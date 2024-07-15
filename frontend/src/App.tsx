@@ -1,5 +1,14 @@
+import { Outlet } from "react-router-dom";
+import Gnb from "./components/Gnb";
+import Footer from "./components/Footer";
 function App() {
-  return <>포트폴리오만드러보자</>;
+  return (
+    <>
+      <Gnb />
+      <Outlet />
+      <Footer />
+    </>
+  );
 }
 
 export default App;
