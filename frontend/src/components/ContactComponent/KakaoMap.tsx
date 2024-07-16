@@ -8,15 +8,14 @@ const KakaoMap: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[500px]">
+    <div className="w-full h-[500px] border">
       <Map
         center={markerPosition}
         style={{ width: "100%", height: "100%" }}
-        level={2} // 지도의 확대 레벨
+        level={3} // 지도의 확대 레벨
       >
         <MapMarker // 마커 표시
           position={markerPosition}
-          onClick={() => alert("인천 서구청입니다.")} // 마커 클릭 시 알림
         />
       </Map>
     </div>
