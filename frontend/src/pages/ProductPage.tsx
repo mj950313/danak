@@ -1,58 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Title from "../components/Title";
 import ProductCard from "../components/ProductCard";
 import { CiWarning } from "react-icons/ci";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
-const products = [
-  {
-    id: 1,
-    name: "BIXOD N MOUNTAIN STREAM",
-    description: "(빅소드 엔 마운틴 스트림)",
-    price: "290,000원",
-    image: "/path/to/image1.jpg",
-    new: true,
-    category: "신제품",
-  },
-  {
-    id: 2,
-    name: "INK N AIR",
-    description: "잉크 엔 에어 쭈꾸미 갑오징어 낚싯대",
-    price: "330,000원",
-    image: "/path/to/image2.jpg",
-    new: true,
-    category: "신제품",
-  },
-  {
-    id: 3,
-    name: "40주년 로드",
-    description: "40주년 한정판)배스,참돔,오징어,갑오징어,광어",
-    price: "410,000원",
-    image: "/path/to/image3.jpg",
-    new: false,
-    category: "바다",
-  },
-  {
-    id: 4,
-    name: "BIXOD N BLACK LABEL",
-    description: "(BIXOD N BLACK LABEL)배스",
-    price: "500,000원",
-    image: "/path/to/image4.jpg",
-    new: true,
-    category: "민물",
-  },
-  {
-    id: 5,
-    name: "BIXOD N BLACK LABEL",
-    description: "(BIXOD N BLACK LABEL)배스",
-    price: "500,000원",
-    image: "/path/to/image4.jpg",
-    new: true,
-    category: "루어",
-  },
-];
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  image: string;
+  new: boolean;
+  category: string;
+}
 
 export default function ProductPage() {
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedCategory, setSelectedCategory] = useState<string>("전체");
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/api/products");
+        if (Array.isArray(response.data)) {
+          setProducts(response.data);
+        } else {
+          console.error("Unexpected response format:", response.data);
+          setProducts([]);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProducts([]);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const filteredProducts =
     selectedCategory === "전체"
@@ -152,7 +136,9 @@ export default function ProductPage() {
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <Link to={`/products/${product.id}`} key={product.id}>
+                  <ProductCard product={product} />
+                </Link>
               ))}
             </div>
           ) : (

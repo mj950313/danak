@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 스와이퍼 */
+.swiper .swiper-button-next, .swiper .swiper-button-prev {
+    color: white;
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.swiper .swiper-pagination {
+    position: static !important;
+    margin-top: 15px;
+}
+
+.swiper-pagination .swiper-pagination-bullet {
+    background-color: black;
+}
+
+.swiper-pagination .swiper-pagination-bullet-active {
+    background-color: black;
+    scale: 1.3;
+}

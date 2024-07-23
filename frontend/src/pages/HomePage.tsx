@@ -2,6 +2,12 @@ import Title from "../components/Title";
 import Youtube from "../components/HomeComponent/Youtube";
 import ProductCard from "../components/ProductCard";
 import StoryCard from "../components/HomeComponent/StoryCard";
+import { Link } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay, A11y } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const products = [
   {
@@ -51,7 +57,6 @@ const stories = [
     id: 1,
     name: "Fishing Adventure",
     description: "A thrilling fishing adventure",
-    price: "$100",
     image: "/path/to/image1.jpg",
     new: true,
     user: {
@@ -60,6 +65,36 @@ const stories = [
   },
   {
     id: 2,
+    name: "River Exploration",
+    description: "Exploring the river",
+    image: "/path/to/image2.jpg",
+    new: true,
+    user: {
+      name: "Jane Smith",
+    },
+  },
+  {
+    id: 3,
+    name: "River Exploration",
+    description: "Exploring the river",
+    image: "/path/to/image2.jpg",
+    new: true,
+    user: {
+      name: "Jane Smith",
+    },
+  },
+  {
+    id: 4,
+    name: "River Exploration",
+    description: "Exploring the river",
+    image: "/path/to/image2.jpg",
+    new: true,
+    user: {
+      name: "Jane Smith",
+    },
+  },
+  {
+    id: 5,
     name: "River Exploration",
     description: "Exploring the river",
     price: "$150",
@@ -80,23 +115,67 @@ export default function HomePage() {
           title="New Products"
           title2="새롭게 입고된 신상품들을 만나보세요"
         />
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay, A11y]}
+          spaceBetween={10}
+          slidesPerView={4}
+          navigation
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 6000 }}
+          breakpoints={{
+            1024: {
+              slidesPerView: 4,
+            },
+            768: {
+              slidesPerView: 3,
+            },
+            640: {
+              slidesPerView: 2,
+            },
+            320: {
+              slidesPerView: 2,
+            },
+          }}
+        >
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <SwiperSlide key={product.id}>
+              <Link to={`/products/${product.id}`}>
+                <ProductCard key={product.id} product={product} />
+              </Link>
+            </SwiperSlide>
           ))}
-        </div>
+        </Swiper>
         <Title title="Danak's story" title2="새로운 이야기들을 나눠보세요" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay, A11y]}
+          spaceBetween={10}
+          slidesPerView={2}
+          navigation
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 6000 }}
+          breakpoints={{
+            1024: {
+              slidesPerView: 4,
+            },
+            768: {
+              slidesPerView: 3,
+            },
+            640: {
+              slidesPerView: 2,
+            },
+            320: {
+              slidesPerView: 2,
+            },
+          }}
+          className="my-10"
+        >
           {stories.map((story) => (
-            <StoryCard key={story.id} story={story} />
+            <SwiperSlide key={story.id}>
+              <StoryCard key={story.id} story={story} />
+            </SwiperSlide>
           ))}
-        </div>
+        </Swiper>
       </div>
-      <img
-        src="/footer.png"
-        alt="footer"
-        className="w-full h-48 object-cover"
-      />
     </div>
   );
 }
