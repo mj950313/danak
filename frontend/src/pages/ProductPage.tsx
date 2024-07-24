@@ -4,6 +4,7 @@ import ProductCard from "../components/ProductCard";
 import { CiWarning } from "react-icons/ci";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import TabBar from "../components/TabBar";
 
 interface Product {
   id: number;
@@ -77,6 +78,14 @@ export default function ProductPage() {
 
   const titleProps = getTitleProps(selectedCategory);
 
+  const tabs = [
+    { label: "전체", value: "전체" },
+    { label: "바다", value: "바다" },
+    { label: "민물", value: "민물" },
+    { label: "루어", value: "루어" },
+    { label: "낚시용품", value: "낚시용품" },
+  ];
+
   return (
     <div className="bg-[url('/product.png')] bg-repeat-x bg-blend-multiply bg-blue-300">
       <div className="flex flex-col gap-3 xl:w-[1280px] mx-auto px-3 xl:px-8 py-28 xl:py-48">
@@ -88,48 +97,11 @@ export default function ProductPage() {
 
       <div className="border bg-white">
         <div className="xl:w-[1280px] mx-auto px-3 xl:px-8 my-10">
-          <div className="flex gap-8 mb-8 text-lg xl:text-2xl">
-            <button
-              className={`${
-                selectedCategory === "전체" ? "text-blue-500" : "text-black"
-              }`}
-              onClick={() => setSelectedCategory("전체")}
-            >
-              전체
-            </button>
-            <button
-              className={`${
-                selectedCategory === "바다" ? "text-blue-500" : "text-black"
-              }`}
-              onClick={() => setSelectedCategory("바다")}
-            >
-              바다
-            </button>
-            <button
-              className={`${
-                selectedCategory === "민물" ? "text-blue-500" : "text-black"
-              }`}
-              onClick={() => setSelectedCategory("민물")}
-            >
-              민물
-            </button>
-            <button
-              className={`${
-                selectedCategory === "루어" ? "text-blue-500" : "text-black"
-              }`}
-              onClick={() => setSelectedCategory("루어")}
-            >
-              루어
-            </button>
-            <button
-              className={`${
-                selectedCategory === "낚시용품" ? "text-blue-500" : "text-black"
-              }`}
-              onClick={() => setSelectedCategory("낚시용품")}
-            >
-              낚시용품
-            </button>
-          </div>
+          <TabBar
+            tabs={tabs}
+            activeTab={selectedCategory}
+            onTabChange={setSelectedCategory}
+          />
 
           <Title title={titleProps.title} title2={titleProps.title2} />
 

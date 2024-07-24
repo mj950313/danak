@@ -4,7 +4,7 @@ import { FiShoppingCart } from "react-icons/fi";
 import { FaRegUser } from "react-icons/fa";
 import { HiMenu } from "react-icons/hi";
 import { GiFishbone } from "react-icons/gi";
-import CartPanel from "./CartPanel";
+import CartPanel from "../components/CartPanel";
 
 export default function Gnb() {
   const [menuOpen, setMenuOpen] = useState(false);

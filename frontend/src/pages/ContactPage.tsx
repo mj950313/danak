@@ -5,9 +5,9 @@ export default function ContactPage() {
   return (
     <div className="bg-[url('/contact.png')] bg-repeat-x bg-blend-multiply bg-blue-300">
       <div className="flex flex-col md:flex-row gap-3 justify-between xl:items-center xl:w-[1280px] mx-auto px-3 xl:px-8 py-10 xl:py-20 ">
-        <h1 className="text-white text-4xl xl:text-5xl font-bold flex flex-col gap-3  py-28 xl:py-24 w-[250px]">
+        <h1 className="text-white text-5xl font-bold flex flex-col gap-3  py-28 xl:py-24 w-[250px]">
           Contact Us
-          <p className="text-white text-xl xl:text-2xl">문의하기</p>
+          <p className="text-white text-2xl">문의하기</p>
         </h1>
 
         <div className="mb-4 md:mb-0 p-5 shadow-lg bg-white/30 ">
