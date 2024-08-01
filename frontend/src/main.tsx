@@ -9,6 +9,7 @@ import ProductPage from "./pages/ProductPage.tsx";
 import ProductDetailPage from "./pages/ProductDetailPage.tsx";
 import CommunityPage from "./pages/CommunityPage.tsx";
 import ContactPage from "./pages/ContactPage.tsx";
+import WritePage from "./pages/WritePage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "/community",
         element: <CommunityPage />,
+      },
+      {
+        path: "/community/write",
+        element: <WritePage />,
       },
       {
         path: "/contact",
