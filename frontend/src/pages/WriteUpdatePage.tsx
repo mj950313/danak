@@ -1,30 +1,53 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
+interface Story {
+  id: string;
+  title: string;
+  content: string;
+  writer: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function WritePostPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/community/write",
-        {
-          title,
-          content,
-        }
-      );
-      console.log(response.data);
+      await axios.put(`http://localhost:8080/api/community/write/${id}`, {
+        title,
+        content,
+      });
       navigate("/community");
     } catch (error) {
-      console.error("에러 발생:", error);
+      console.error("Error updating the story:", error);
     }
   };
+
+  useEffect(() => {
+    const fetchStory = async () => {
+      try {
+        const response = await axios.get<Story>(
+          `http://localhost:8080/api/community/${id}`
+        );
+        setTitle(response.data.title);
+        setContent(response.data.content);
+      } catch (error) {
+        console.error("Error fetching the story:", error);
+      }
+    };
+
+    fetchStory();
+  }, [id]);
 
   const modules = {
     toolbar: {
@@ -55,7 +78,7 @@ export default function WritePostPage() {
       </div>
       <div className="border bg-white">
         <div className="py-8 xl:w-[1280px] mx-auto px-3 xl:px-8">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleUpdate}>
             <div className="mb-4">
               <label htmlFor="title" className="text-gray-700">
                 제목

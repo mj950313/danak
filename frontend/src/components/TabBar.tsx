@@ -11,7 +11,7 @@ interface TabBarProps {
 
 const TabBar: React.FC<TabBarProps> = ({ tabs, activeTab, onTabChange }) => {
   return (
-    <div className="border-y my-10 flex sm:gap-5 text-lg sm:text-xl text-gray-400">
+    <div className="my-10 flex sm:gap-5 text-lg sm:text-xl text-gray-400">
       {tabs.map((tab) => (
         <button
           key={tab.value}

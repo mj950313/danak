@@ -10,6 +10,8 @@ import ProductDetailPage from "./pages/ProductDetailPage.tsx";
 import CommunityPage from "./pages/CommunityPage.tsx";
 import ContactPage from "./pages/ContactPage.tsx";
 import WritePage from "./pages/WritePage.tsx";
+import CommunityDetailPage from "./pages/CommunityDetailPage.tsx";
+import WriteUpdatePage from "./pages/WriteUpdatePage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -30,8 +32,16 @@ const router = createBrowserRouter([
         element: <CommunityPage />,
       },
       {
+        path: "/community/:id",
+        element: <CommunityDetailPage />,
+      },
+      {
         path: "/community/write",
         element: <WritePage />,
+      },
+      {
+        path: "/community/write/:id",
+        element: <WriteUpdatePage />,
       },
       {
         path: "/contact",
