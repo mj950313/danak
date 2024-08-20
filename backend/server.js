@@ -1,6 +1,14 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+// const secretKey = crypto.randomBytes(32).toString('hex');
+// console.log(secretKey); // 생성된 비밀키를 출력
+require('dotenv').config(); // .env 파일에서 환경 변수를 불러옵니다.
+
+const SECRET_KEY = process.env.SECRET_KEY; 
 
 app.use(express.json());
 var cors = require('cors');
@@ -24,8 +32,6 @@ new MongoClient(url).connect().then(()=>{
     console.log(err)
 })
 
-
-
 const products = [
     { id: 1, name: "BIXOD N MOUNTAIN STREAM", description: "(빅소드 엔 마운틴 스트림)", price: "290,000원", image: "/path/to/image1.jpg", category: "신제품" },
     { id: 2, name: "INK N AIR", description: "잉크 엔 에어 쭈꾸미 갑오징어 낚싯대", price: "330,000원", image: "/path/to/image2.jpg", category: "신제품" },
@@ -34,6 +40,53 @@ const products = [
     { id: 5, name: "BIXOD N BLACK LABEL", description: "(BIXOD N BLACK LABEL)배스", price: "500,000원", image: "/path/to/image4.jpg", category: "루어" },
   ];
   
+  
+  // 회원가입 API
+app.post("/api/auth/register", async (req, res) => {
+    const { email, password, confirmPassword, name, nickname, phoneNumber } = req.body;
+  
+    // 이메일 중복 확인
+    const existingUser = await db.collection('users').findOne({ email });
+    const vaildNickname = await db.collection('users').findOne({ nickname });
+    
+    if (vaildNickname) {
+        return res.status(400).json({ error: "이미 사용 중인 닉네임입니다." });
+      }
+    if (existingUser) {
+      return res.status(400).json({ error: "이미 사용 중인 이메일입니다." });
+    }
+   
+    if (password.length < 8) {
+      return res.status(400).json({ error: "비밀번호는 8자 이상이어야 합니다." });
+    }
+    if (password !== confirmPassword) {
+        return res.status(400).json({ error: "비밀번호와 비밀번호 확인이 일치하지 않습니다." });
+      }
+  
+    // 비밀번호 해싱
+    const hashedPassword = await bcrypt.hash(password, 10);
+  
+    try {
+      // 사용자 정보 저장
+      const newUser = await db.collection("users").insertOne({
+        email,
+        password: hashedPassword,
+        nickname,
+        phoneNumber,
+        name,
+        createdAt: new Date(),
+      });
+  
+      // 사용자에게 JWT 토큰 발급
+      const token = jwt.sign({ userId: newUser.insertedId }, SECRET_KEY, { expiresIn: '1h' });
+      
+      // 성공 응답
+      res.json({ token, message: "회원가입이 완료되었습니다." });
+  
+    } catch (error) {
+      res.status(500).json({ error: "회원가입 중 서버 오류가 발생했습니다." });
+    }
+  });
 
 // API
 app.get("/api/products", (req, res) => {
