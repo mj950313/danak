@@ -5,6 +5,7 @@ import { FaRegUser } from "react-icons/fa";
 import { HiMenu } from "react-icons/hi";
 import { GiFishbone } from "react-icons/gi";
 import CartPanel from "../components/CartPanel";
+import SignModal from "../components/SignModal";
 
 export default function Gnb() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function Gnb() {
   const [bgColor, setBgColor] = useState("transparent");
   const [textColor, setTextColor] = useState("text-white");
   const location = useLocation();
+  const [signModalOpen, setSignModalOpen] = useState(false);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -19,6 +21,10 @@ export default function Gnb() {
 
   const toggleCart = () => {
     setCartOpen(!cartOpen);
+  };
+
+  const toggleSignModal = () => {
+    setSignModalOpen(!signModalOpen);
   };
 
   const handleScroll = () => {
@@ -97,12 +103,12 @@ export default function Gnb() {
           >
             <FiShoppingCart />
           </button>
-          <Link
+          <button
+            onClick={toggleSignModal}
             className="p-2 rounded-full bg-white border-2 hover:text-blue-500 hover:border-blue-500"
-            to="/signin"
           >
             <FaRegUser />
-          </Link>
+          </button>
           <button
             className="md:hidden p-2 rounded-full bg-white border-2 hover:text-blue-500 hover:border-blue-500"
             onClick={toggleMenu}
@@ -145,6 +151,7 @@ export default function Gnb() {
         </div>
       )}
       <CartPanel isOpen={cartOpen} onClose={toggleCart} />
+      <SignModal isOpen={signModalOpen} onClose={toggleSignModal} />
     </div>
   );
 }

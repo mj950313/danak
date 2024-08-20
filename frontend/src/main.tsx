@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import SignIn from "./pages/SignIn.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import ProductPage from "./pages/ProductPage.tsx";
 import ProductDetailPage from "./pages/ProductDetailPage.tsx";
@@ -46,10 +45,6 @@ const router = createBrowserRouter([
       {
         path: "/contact",
         element: <ContactPage />,
-      },
-      {
-        path: "/signin",
-        element: <SignIn />,
       },
     ],
   },
