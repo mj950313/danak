@@ -4,6 +4,10 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const cookieParser = require('cookie-parser'); //쿠키를 읽으려면 필요
+
+app.use(cookieParser());
+
 
 require('dotenv').config();
 
@@ -16,7 +20,10 @@ const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
 
 app.use(express.json({limit:"50mb"}));
 var cors = require('cors');
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true, 
+}));
 app.use(express.urlencoded({limit: "50mb",extended: true})); //req.body 쓰려면 이코드가 필요
 
 //  몽고디비연결
@@ -59,7 +66,7 @@ const uploadToS3 = async (base64Image, fileName) => {
   
   try {
       const command = new PutObjectCommand(params);
-      const data = await s3Client.send(command);
+      await s3Client.send(command);
       return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`; // S3 URL 반환
   } catch (error) {
       console.error("S3 업로드 중 오류 발생:", error);
@@ -84,6 +91,24 @@ const deleteFromS3 = async (url) => {
       throw new Error('S3 삭제 실패');
   }
 };
+
+// JWT 인증 미들웨어
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // 'Bearer' 이후의 토큰만 추출
+
+  if (!token) {
+    return res.status(401).json({ error: '토큰이 필요합니다.' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY); // 토큰 검증
+    req.user = decoded; // 검증된 유저 정보를 req.user에 저장
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
+  }
+};
+
 //커뮤니티 API
 app.get("/api/community", async (req, res) => {
 try {
@@ -138,9 +163,16 @@ while ((match = base64Regex.exec(content)) !== null) {
 return urls;
 };
 
-app.delete("/api/community/:id", async (req, res) => {
+app.delete("/api/community/:id", verifyToken, async (req, res) => {
 try {
   const id = req.params.id;
+
+    // JWT 토큰에서 가져온 userId로 DB에서 해당 사용자의 정보를 조회
+    const userFromDB = await db.collection("users").findOne({ _id: new ObjectId(req.user.userId) });
+    
+    if (!userFromDB) {
+      return res.status(404).json({ error: "토큰이 유효하지 않습니다." });
+    }
 
   // 글을 찾기 위해 먼저 해당 글을 조회
   const post = await db.collection("community").findOne({ _id: new ObjectId(id) });
@@ -170,9 +202,16 @@ try {
 });
 
 
-app.put("/api/community/write/:id", async (req, res) => {
+app.put("/api/community/write/:id", verifyToken, async (req, res) => {
 try {
   const id = req.params.id;
+
+    // JWT 토큰에서 가져온 userId로 DB에서 해당 사용자의 정보를 조회
+    const userFromDB = await db.collection("users").findOne({ _id: new ObjectId(req.user.userId) });
+    
+    if (!userFromDB) {
+      return res.status(404).json({ error: "토큰이 유효하지 않습니다." });
+    }
 
   // 기존 글을 찾아서 기존 이미지를 추출
   const existingPost = await db.collection("community").findOne({ _id: new ObjectId(id) });
@@ -216,45 +255,54 @@ try {
 
 
 const replaceBase64WithUrls = async (content) => {
-const base64Regex = /<img[^>]+src="data:image\/[^">]+"/g;
-let match;
-let updatedContent = content;
+  const base64Regex = /<img[^>]+src="data:image\/[^">]+"/g;
+  let match;
+  let updatedContent = content;
 
-while ((match = base64Regex.exec(content)) !== null) {
-const base64Image = match[0].match(/src="([^"]+)"/)[1]; // base64 이미지 추출
-const fileName = `${Date.now()}.jpeg`; // 파일명 설정
+  while ((match = base64Regex.exec(content)) !== null) {
+  const base64Image = match[0].match(/src="([^"]+)"/)[1]; // base64 이미지 추출
+  const fileName = `${Date.now()}.jpeg`; // 파일명 설정
 
-// S3에 업로드하고 URL 반환
-const imageUrl = await uploadToS3(base64Image, fileName);
+  // S3에 업로드하고 URL 반환
+  const imageUrl = await uploadToS3(base64Image, fileName);
 
-// base64 이미지 URL로 교체
-updatedContent = updatedContent.replace(base64Image, imageUrl);
-}
+  // base64 이미지 URL로 교체
+  updatedContent = updatedContent.replace(base64Image, imageUrl);
+  }
 
-return updatedContent;
+  return updatedContent;
 };
 
-// 글 작성 API
-app.post("/api/community/write", async (req, res) => {
-const { title, content } = req.body;
 
-try {
-// 콘텐츠의 base64 이미지를 추출하고 S3 URL로 대체
-const updatedContent = await replaceBase64WithUrls(content);
+app.post("/api/community/write", verifyToken, async (req, res) => {
+  const { title, content } = req.body;
 
-// DB에 저장
-await db.collection("community").insertOne({
-  title,
-  content: updatedContent,
-  createdAt: new Date(),
+  try {
+    // JWT 토큰에서 가져온 userId로 DB에서 해당 사용자의 정보를 조회
+    const userFromDB = await db.collection("users").findOne({ _id: new ObjectId(req.user.userId) });
+    
+    if (!userFromDB) {
+      return res.status(404).json({ error: "토큰이 유효하지 않습니다." });
+    }
+
+    // base64 이미지 처리 (S3 업로드 후 URL로 교체)
+    const updatedContent = await replaceBase64WithUrls(content);
+
+    // 글 작성
+    await db.collection("community").insertOne({
+      userNickname: userFromDB.nickname, // 유저 닉네임은 토큰으로 인증된 유저 정보를 사용
+      title,
+      content: updatedContent,
+      createdAt: new Date(),
+    });
+
+    res.status(200).send("글 작성 완료");
+  } catch (error) {
+    console.error("Error writing post:", error);
+    res.status(500).send("글 작성 중 서버 에러가 발생했습니다.");
+  }
 });
 
-res.send("글 작성 완료");
-} catch (error) {
-console.error("Error writing post:", error);
-res.status(500).send("글 작성 중 서버 에러가 발생했습니다.");
-}
-});
 
 
 
@@ -273,7 +321,7 @@ app.get("/api/products", (req, res) => {
 
   
   
-    // 회원가입 API
+// 회원가입/로그인 API
 app.post("/api/auth/register", async (req, res) => {
     const { email, password, confirmPassword, name, nickname, phoneNumber } = req.body;
   
@@ -313,55 +361,84 @@ app.post("/api/auth/register", async (req, res) => {
     }
   });
 
-    // 로그인API
-    app.post("/api/auth/login", async (req, res) => {
-        const { email, password } = req.body;
-      
-        try {
-          const user = await db.collection("users").findOne({ email });
-      
-          if (!user) {
-            return res.status(400).json({ error: "이메일 또는 존재하지 않는 이메일입니다." });
-          }
-      
-          const isMatch = await bcrypt.compare(password, user.password);
-          if (!isMatch) {
-            return res.status(400).json({ error: "이메일 또는 비밀번호가 일치하지 않습니다." });
-          }
-      
-          // JWT 액세스 토큰 발급 (유효기간 15분)
-          const accessToken = jwt.sign({ userId: user._id }, SECRET_KEY, {
-            expiresIn: "15m",
-          });
-      
-          // JWT 리프레시 토큰 발급 (유효기간 7일)
-          const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET_KEY, {
-            expiresIn: "7d",
-          });
-      
-          // 리프레시 토큰을 HttpOnly 쿠키로 전송
-          res.cookie("refreshToken", refreshToken, {
-            httpOnly: true, // JS로 접근 불가
-            secure: true,   // HTTPS에서만 전송 (개발 시에는 false로 설정)
-            sameSite: "strict", // CSRF 공격 방지
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 쿠키 유효기간 7일
-          });
-      
-          res.json({ accessToken, user: user.nickname, message: "로그인이 성공적으로 완료되었습니다." });
-        } catch (error) {
-          console.error(error);
-          res.status(500).json({ error: "로그인 중 서버 오류가 발생했습니다." });
-        }
-      });
-      
+
+app.post("/api/auth/login", async (req, res) => {
+    const { email, password } = req.body;
   
+    try {
+      const user = await db.collection("users").findOne({ email });
+  
+      if (!user) {
+        return res.status(400).json({ error: "이메일 또는 존재하지 않는 이메일입니다." });
+      }
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ error: "이메일 또는 비밀번호가 일치하지 않습니다." });
+      }
+  
+      // JWT 액세스 토큰 발급 (유효기간 15분)
+      const accessToken = jwt.sign({ userId: user._id }, SECRET_KEY, {
+        expiresIn: "1m",
+      });
+  
+      // JWT 리프레시 토큰 발급 (유효기간 7일)
+      const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET_KEY, {
+        expiresIn: "7d",
+      });
+  
+      // 리프레시 토큰을 HttpOnly 쿠키로 전송
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true, // JS로 접근 불가
+        secure: true,   // HTTPS에서만 전송 (개발 시에는 false로 설정)
+        sameSite: "None", // CSRF 공격 방지
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 쿠키 유효기간 7일
+      });
+  
+      res.json({ accessToken, user: user.nickname, message: "로그인이 성공적으로 완료되었습니다." });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "로그인 중 서버 오류가 발생했습니다." });
+    }
+  });
 
+//리프레쉬토큰 API
+app.post("/api/auth/refresh-token", async (req, res) => {
+  const refreshToken = req.cookies.refreshToken; // 쿠키에서 리프레시 토큰 추출
+console.log("refreshToken", refreshToken);
+  if (!refreshToken) {
+    return res.status(401).json({ error: "리프레시 토큰이 없습니다." });
+  }
 
+  try {
+    // 리프레시 토큰 검증
+    const decoded = jwt.verify(refreshToken, REFRESH_SECRET_KEY);
+    const userId = decoded.userId;
 
+    // 사용자 정보 가져오기
+    const userFromDB = await db.collection("users").findOne({ _id: new ObjectId(userId) });
 
+    if (!userFromDB) {
+      return res.status(404).json({ error: "유저를 찾을 수 없습니다." });
+    }
 
+    // 새로운 액세스 토큰 발급 (유효기간 15분)
+    const newAccessToken = jwt.sign({ userId: userFromDB._id }, SECRET_KEY, {
+      expiresIn: "15m",
+    });
 
+    // 새로운 액세스 토큰 반환
+    res.json({
+      accessToken: newAccessToken,
+      user: userFromDB.nickname,
+    });
+  } catch (error) {
+    console.error("리프레시 토큰 검증 실패:", error);
+    res.status(403).json({ error: "유효하지 않은 리프레시 토큰입니다." });
+  }
+});
 
+      
 // 리액트 라우터사용
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
