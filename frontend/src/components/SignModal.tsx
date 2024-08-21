@@ -3,36 +3,43 @@ import Input from "../components/Input";
 import { IoMdClose } from "react-icons/io";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { FaSpinner } from "react-icons/fa"; // 스피너 아이콘을 위한 패키지
+import { FaSpinner } from "react-icons/fa";
+import { login } from "../store/slices/userSlice";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 interface SignModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface SignUpFormData {
+interface SignFormData {
   name: string;
   nickname: string;
   email: string;
   phoneNumber: string;
   password: string;
   confirmPassword: string;
+  id: string;
+  pwd: string;
 }
 
 export default function SignModal({ isOpen, onClose }: SignModalProps) {
   const [currentTab, setCurrentTab] = useState("로그인");
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-  const [isLoading, setIsLoading] = useState(false); // 요청 진행 중인지 여부
-  const [loginMessage, setLoginMessage] = useState(""); // 로그인 창에 띄울 메시지
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginMessage, setLoginMessage] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     watch,
     trigger,
-    setError, // 오류 메시지를 설정하는 함수
+    setError,
     formState: { errors, isValid },
-  } = useForm<SignUpFormData>({ mode: "onChange" });
+  } = useForm<SignFormData>({ mode: "onChange" });
 
   const password = watch("password");
 
@@ -44,7 +51,7 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
     setCurrentTab(tab);
   };
 
-  const onSignUp = async (data: SignUpFormData) => {
+  const onSignUp = async (data: SignFormData) => {
     setIsLoading(true);
 
     try {
@@ -71,6 +78,40 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
         });
       } else {
         console.error("회원가입 실패", error);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onSignIn = async (data: SignFormData) => {
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/login",
+        {
+          email: data.id,
+          password: data.pwd,
+        },
+        { withCredentials: true }
+      );
+      const { accessToken, user } = response.data;
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("user", user); // 객체는 문자열로 변환
+      console.log(response.data);
+
+      dispatch(login({ accessToken, user }));
+      onClose();
+      navigate("/");
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        setError("pwd", {
+          type: "manual",
+          message: "이메일 또는 비밀번호가 일치하지 않습니다.",
+        });
+      } else {
+        console.error("로그인 실패", error);
       }
     } finally {
       setIsLoading(false);
@@ -120,22 +161,39 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
 
         {/* 로그인 폼 */}
         {currentTab === "로그인" && (
-          <div>
+          <form onSubmit={handleSubmit(onSignIn)}>
             {loginMessage && (
               <p className="mb-4 text-green-500 text-lg text-center">
                 {loginMessage}
               </p>
             )}
-            <Input text="이메일" type="email" className="w-full mb-4 border" />
+            <Input
+              text="이메일"
+              type="email"
+              className="w-full mb-4 border"
+              {...register("id", {
+                required: "이메일을 입력하세요.",
+              })}
+            />
             <Input
               text="비밀번호"
               type="password"
               className="w-full mb-4 border"
+              {...register("pwd", {
+                required: "비밀번호를 입력하세요.",
+              })}
             />
+            {errors.pwd && (
+              <p className="text-red-500 text-sm mb-2">{errors.pwd.message}</p>
+            )}
             <button className="w-full py-5 mt-2 text-xl font-bold bg-blue-500 rounded text-white hover:bg-blue-600">
-              Sign In
+              {isLoading ? (
+                <FaSpinner className="animate-spin inline-block mr-2" />
+              ) : (
+                "Sign In"
+              )}
             </button>
-          </div>
+          </form>
         )}
 
         {/* 회원가입 폼 */}
@@ -150,6 +208,10 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
                   minLength: {
                     value: 2,
                     message: "이름은 2자 이상이어야 합니다.",
+                  },
+                  maxLength: {
+                    value: 6,
+                    message: "이름은 6자 이내여야 합니다.",
                   },
                 })}
                 onBlur={() => trigger("name")}
@@ -168,6 +230,10 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
                   minLength: {
                     value: 2,
                     message: "닉네임은 2자 이상이어야 합니다.",
+                  },
+                  maxLength: {
+                    value: 6,
+                    message: "닉네임은 6자 이내여야 합니다.",
                   },
                 })}
                 onBlur={() => trigger("nickname")}

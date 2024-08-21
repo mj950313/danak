@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
               <p className="text-gray-400  pb-3">
                 Your ultimate destination for fishing gear and community.
               </p>
-              <div className="border-b-[3px] border-b-blue-500"></div>
+              <div className="border-b-[3px] border-b-blue-700"></div>
             </div>
 
             {/* 링크 섹션 */}

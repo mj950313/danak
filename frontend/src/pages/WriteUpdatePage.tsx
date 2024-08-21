@@ -3,6 +3,8 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import api from "../api/api";
 
 interface Story {
   id: string;
@@ -18,15 +20,24 @@ export default function WritePostPage() {
   const [content, setContent] = useState("");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const accessToken = useSelector((state: any) => state.user.accessToken);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      await axios.put(`http://localhost:8080/api/community/write/${id}`, {
-        title,
-        content,
-      });
+      await api.put(
+        `http://localhost:8080/api/community/write/${id}`,
+        {
+          title,
+          content,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
       navigate("/community");
     } catch (error) {
       console.error("Error updating the story:", error);

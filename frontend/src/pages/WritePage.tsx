@@ -3,11 +3,14 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function WritePostPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const navigate = useNavigate();
+  const user = useSelector((state: any) => state.user.user);
+  const accessToken = useSelector((state: any) => state.user.accessToken);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,8 +18,14 @@ export default function WritePostPage() {
       const response = await axios.post(
         "http://localhost:8080/api/community/write",
         {
+          user,
           title,
           content,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
       console.log(response.data);

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import api from "../api/api";
 
 interface Story {
   id: string;
   title: string;
   content: string;
-  writer: string;
+  userNickname: string;
   createdAt: string;
   updatedAt: string;
   image?: string;
@@ -16,6 +18,8 @@ export default function CommunityDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [story, setStory] = useState<Story | null>(null);
   const navigate = useNavigate();
+  const accessToken = useSelector((state: any) => state.user.accessToken);
+  const user = useSelector((state: any) => state.user.user);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -24,6 +28,7 @@ export default function CommunityDetailPage() {
           `http://localhost:8080/api/community/${id}`
         );
         setStory(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching the story:", error);
       }
@@ -37,7 +42,11 @@ export default function CommunityDetailPage() {
       return;
     }
     try {
-      await axios.delete(`http://localhost:8080/api/community/${id}`);
+      await api.delete(`http://localhost:8080/api/community/${id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       alert("글이 삭제되었습니다.");
       navigate("/community");
     } catch (error) {
@@ -62,37 +71,41 @@ export default function CommunityDetailPage() {
       </div>
       <div className="bg-white xl:w-[1280px] mx-auto px-3 xl:px-8 my-10">
         <h1 className="text-3xl mb-3 truncate">{story.title}</h1>
-        <div className="flex gap-3 border-b pb-5">
-          <img
+        <div className="flex gap-3 border-b-2 pb-5">
+          {/* <img
             src={story.image || "/default-image.png"}
             alt="사진"
             className="border w-14 h-14 rounded-full"
-          />
+          /> */}
           <div className="my-auto">
-            <p className="font-bold">{story.writer || "작성자"}</p>
+            <p className="font-bold text-lg">{story.userNickname}</p>
             <p className="text-gray-500">
-              {new Date(story.createdAt).toLocaleDateString()}
+              {`${new Date(story.createdAt).getFullYear()}.${(new Date(story.createdAt).getMonth() + 1).toString().padStart(2, "0")}.${new Date(story.createdAt).getDate().toString().padStart(2, "0")}`}
             </p>
           </div>
         </div>
-        <div className="flex flex-col my-5 border-b py-5">
+        <div className="flex flex-col my-5 border-b-2 py-5">
           <p
             className="min-h-[300px]"
             dangerouslySetInnerHTML={{ __html: story.content }}
           />
           <div className="flex">
             <div className="flex gap-3">
-              <button
-                onClick={handleDelete}
-                className="w-[90px] mt-5 h-10 justify-center flex items-center rounded-md bg-blue-500 text-white"
-              >
-                삭제
-              </button>
-              <Link to={`/community/write/${id}`}>
-                <button className="w-[90px] mt-5 h-10 justify-center flex items-center rounded-md bg-blue-500 text-white">
-                  수정
-                </button>
-              </Link>
+              {user === story.userNickname && (
+                <>
+                  <button
+                    onClick={handleDelete}
+                    className="w-[90px] mt-5 h-10 justify-center flex items-center rounded-md bg-blue-500 text-white"
+                  >
+                    삭제
+                  </button>
+                  <Link to={`/community/write/${id}`}>
+                    <button className="w-[90px] mt-5 h-10 justify-center flex items-center rounded-md bg-blue-500 text-white">
+                      수정
+                    </button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

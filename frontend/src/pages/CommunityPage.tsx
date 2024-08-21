@@ -1,14 +1,16 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { BsPencilSquare } from "react-icons/bs";
-import { Link } from "react-router-dom";
-import { Pagination } from "antd"; // Ant Design Pagination 컴포넌트 임포트
+import { Link, useNavigate } from "react-router-dom";
+import { Pagination } from "antd";
+import AuthenticationModal from "../components/AuthenticationModal";
+import { useSelector } from "react-redux"; // Redux에서 상태를 가져오기 위한 임포트
 
 interface Story {
   _id: number;
   title: string;
   content: string;
-  writer: string;
+  userNickname: string;
   createdAt: string;
   updatedAt: string;
   image: string;
@@ -18,6 +20,28 @@ export default function CommunityPage() {
   const [storys, setStorys] = useState<Story[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const navigate = useNavigate();
+
+  const accessToken = useSelector((state: any) => state.user.accessToken);
+
+  const showModal = () => {
+    if (!accessToken) {
+      setIsModalVisible(true);
+    } else {
+      navigate("/community/write");
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
+
+  const thumnail = (content: string): string => {
+    const imgRegex = /<img[^>]+src="([^">]+)"/g;
+    const match = imgRegex.exec(content);
+    return match ? match[1] : "/noimg.png"; // 첫 번째 이미지가 없으면 기본 이미지 반환
+  };
 
   useEffect(() => {
     const fetchStorys = async (page: number) => {
@@ -28,6 +52,7 @@ export default function CommunityPage() {
         if (response.data.posts) {
           setStorys(response.data.posts);
           setTotalPages(response.data.totalPages);
+          console.log(response.data.posts);
         } else {
           console.error("Unexpected response format:", response.data);
           setStorys([]);
@@ -78,12 +103,19 @@ export default function CommunityPage() {
                       {story.content.replace(/(<([^>]+)>)/gi, "")}
                     </p>
                   </Link>
-                  <div className="flex text-gray-500 text-sm">
+                  <div className="flex gap-1 text-gray-500 text-sm">
                     <span className="text-black hover:underline">
-                      {story.writer}
+                      {story.userNickname} ・
                     </span>
                     <span>
-                      {new Date(story.createdAt).toLocaleDateString()}
+                      {`${new Date(story.createdAt).getFullYear()}.${(
+                        new Date(story.createdAt).getMonth() + 1
+                      )
+                        .toString()
+                        .padStart(2, "0")}.${new Date(story.createdAt)
+                        .getDate()
+                        .toString()
+                        .padStart(2, "0")}`}
                     </span>
                   </div>
                 </div>
@@ -92,7 +124,7 @@ export default function CommunityPage() {
                   className="flex flex-col gap-3"
                 >
                   <img
-                    src={story.image || "/default-image.png"}
+                    src={thumnail(story.content)}
                     alt="게시글 이미지"
                     className="w-32 h-32 object-cover border"
                   />
@@ -103,13 +135,14 @@ export default function CommunityPage() {
             <p className="text-center py-10">게시글이 없습니다.</p>
           )}
 
-          <Link to="/community/write">
-            <button className="w-[90px] mt-5 h-10 ml-auto justify-center flex items-center rounded-md bg-blue-500 text-white">
-              <BsPencilSquare />
-              글작성
-            </button>
-          </Link>
-          {/* Pagination 컴포넌트 */}
+          <button
+            onClick={showModal}
+            className="w-[90px] mt-5 h-10 ml-auto justify-center flex items-center rounded-md bg-blue-500 text-white"
+          >
+            <BsPencilSquare />
+            글작성
+          </button>
+
           <Pagination
             className="flex justify-center mt-5"
             current={currentPage} // 현재 페이지 번호
@@ -119,6 +152,8 @@ export default function CommunityPage() {
           />
         </div>
       </div>
+
+      <AuthenticationModal visible={isModalVisible} onClose={closeModal} />
     </>
   );
 }
