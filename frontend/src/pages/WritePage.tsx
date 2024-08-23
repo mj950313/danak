@@ -1,9 +1,9 @@
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import api from "../api/api";
 
 export default function WritePostPage() {
   const [title, setTitle] = useState("");
@@ -15,7 +15,7 @@ export default function WritePostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "http://localhost:8080/api/community/write",
         {
           user,

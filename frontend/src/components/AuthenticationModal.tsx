@@ -32,7 +32,7 @@ const AuthenticationModal: React.FC<AuthenticationModalProps> = ({
             LOGIN
           </div>
         }
-        visible={visible}
+        open={visible}
         onCancel={onClose}
         footer={[
           <Button key="close" onClick={onClose}>
@@ -42,7 +42,6 @@ const AuthenticationModal: React.FC<AuthenticationModalProps> = ({
             로그인
           </Button>,
         ]}
-        bodyStyle={{ height: "50px" }}
       >
         <p className="text-center mt-10 text-base">
           지금 회원이 되시면 다양한 서비스를 편리하게 이용하실 수 있습니다.

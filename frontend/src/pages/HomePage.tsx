@@ -8,105 +8,83 @@ import { Navigation, Pagination, Autoplay, A11y } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
-const products = [
-  {
-    id: 1,
-    name: "BIXOD N MOUNTAIN STREAM",
-    description: "(빅소드 엔 마운틴 스트림)",
-    price: "290,000원",
-    image: "/path/to/image1.jpg",
-    new: true,
-  },
-  {
-    id: 2,
-    name: "INK N AIR",
-    description: "잉크 엔 에어 쭈꾸미 갑오징어 낚싯대",
-    price: "330,000원",
-    image: "/path/to/image2.jpg",
-    new: true,
-  },
-  {
-    id: 3,
-    name: "40주년 로드",
-    description: "40주년 한정판)배스,참돔,오징어,갑오징어,광어",
-    price: "410,000원",
-    image: "/path/to/image3.jpg",
-    new: false,
-  },
-  {
-    id: 4,
-    name: "BIXOD N BLACK LABEL",
-    description: "(BIXOD N BLACK LABEL)배스",
-    price: "500,000원",
-    image: "/path/to/image4.jpg",
-    new: true,
-  },
-  {
-    id: 5,
-    name: "BIXOD N BLACK LABEL",
-    description: "(BIXOD N BLACK LABEL)배스",
-    price: "500,000원",
-    image: "/path/to/image4.jpg",
-    new: true,
-  },
-];
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: string;
+  category: string;
+  productImage: string;
+  image: string;
+  productName: string;
+}
 
-const stories = [
-  {
-    id: 1,
-    name: "Fishing Adventure",
-    description: "A thrilling fishing adventure",
-    image: "/path/to/image1.jpg",
-    new: true,
-    user: {
-      name: "John Doe",
-    },
-  },
-  {
-    id: 2,
-    name: "River Exploration",
-    description: "Exploring the river",
-    image: "/path/to/image2.jpg",
-    new: true,
-    user: {
-      name: "Jane Smith",
-    },
-  },
-  {
-    id: 3,
-    name: "River Exploration",
-    description: "Exploring the river",
-    image: "/path/to/image2.jpg",
-    new: true,
-    user: {
-      name: "Jane Smith",
-    },
-  },
-  {
-    id: 4,
-    name: "River Exploration",
-    description: "Exploring the river",
-    image: "/path/to/image2.jpg",
-    new: true,
-    user: {
-      name: "Jane Smith",
-    },
-  },
-  {
-    id: 5,
-    name: "River Exploration",
-    description: "Exploring the river",
-    price: "$150",
-    image: "/path/to/image2.jpg",
-    new: true,
-    user: {
-      name: "Jane Smith",
-    },
-  },
-];
+interface Story {
+  _id: string;
+  name: string;
+  title: string;
+  content: string;
+  description: string;
+  image: string;
+  userInfo: {
+    nickname: string;
+  };
+}
 
 export default function HomePage() {
+  // 상품 데이터를 fetch하는 함수
+  const fetchProducts = async () => {
+    const response = await axios.get("http://localhost:8080/api/products");
+    console.log(response.data);
+
+    return response.data.products;
+  };
+
+  const {
+    data: products = [],
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useQuery<Product[], Error>({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+
+  // 스토리 데이터를 fetch하는 함수
+  const fetchStories = async () => {
+    const response = await axios.get("http://localhost:8080/api/community");
+    return response.data.posts;
+  };
+
+  const {
+    data: stories = [],
+    isLoading: storiesLoading,
+    isError: storiesError,
+  } = useQuery<Story[], Error>({
+    queryKey: ["stories"],
+    queryFn: fetchStories,
+  });
+
+  if (productsLoading || storiesLoading) {
+    return (
+      <div className="flex justify-center items-center h-[600px]">
+        <p className="text-black text-xl font-semibold">로딩 중...</p>
+      </div>
+    );
+  }
+
+  if (productsError || storiesError) {
+    return (
+      <div className="flex justify-center items-center h-[600px]">
+        <p className="text-red-500 text-xl font-semibold">
+          데이터를 불러오는 중 오류가 발생했습니다.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <Youtube />
@@ -138,14 +116,15 @@ export default function HomePage() {
           }}
         >
           {products.map((product) => (
-            <SwiperSlide key={product.id}>
-              <Link to={`/products/${product.id}`}>
-                <ProductCard key={product.id} product={product} />
+            <SwiperSlide key={product._id}>
+              <Link to={`/products/${product._id}`}>
+                <ProductCard key={product._id} product={product} />
               </Link>
             </SwiperSlide>
           ))}
         </Swiper>
-        <Title title="Danak's story" title2="새로운 이야기들을 나눠보세요" />
+
+        <Title title="Danak's Story" title2="새로운 이야기들을 나눠보세요" />
         <Swiper
           modules={[Navigation, Pagination, Autoplay, A11y]}
           spaceBetween={10}
@@ -170,8 +149,10 @@ export default function HomePage() {
           className="my-10"
         >
           {stories.map((story) => (
-            <SwiperSlide key={story.id}>
-              <StoryCard key={story.id} story={story} />
+            <SwiperSlide key={story._id}>
+              <Link to={`/community/${story._id}`}>
+                <StoryCard key={story._id} story={story} />
+              </Link>
             </SwiperSlide>
           ))}
         </Swiper>

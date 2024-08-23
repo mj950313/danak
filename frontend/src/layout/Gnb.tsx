@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaRegUser } from "react-icons/fa";
@@ -16,6 +16,8 @@ export default function Gnb() {
   const [textColor, setTextColor] = useState("text-white");
   const [signModalOpen, setSignModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false); // 드롭다운 메뉴 상태
+
+  const userMenuRef = useRef<HTMLDivElement>(null); // 드롭다운 영역을 감지하기 위한 ref
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -78,6 +80,28 @@ export default function Gnb() {
     navigate("/");
   };
 
+  // 드롭다운 외부 클릭 감지 로직
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userMenuOpen]);
+
   return (
     <div className={`sticky top-0 w-full py-8 z-10 ${bgColor}`}>
       <header className="flex justify-between px-3 xl:px-8 items-center mx-auto xl:w-[1280px]">
@@ -132,7 +156,7 @@ export default function Gnb() {
           </button>
 
           {user ? (
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
               <button
                 onClick={toggleUserMenu}
                 className="flex items-center gap-1 p-2 rounded-lg text-white border-2 border-blue-700 bg-blue-700 hover:bg-blue-800"
@@ -142,12 +166,13 @@ export default function Gnb() {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute flex flex-col right-0 p-2 mt-2 w-max bg-white border rounded shadow-xl">
+                <div className="absolute flex flex-col right-0 mt-2 w-max bg-white rounded shadow-xl">
                   <Link to="/mypage">
-                    <p className="flex items-center gap-1 px-4 py-2">
+                    <p className="flex items-center gap-1 px-4 py-2 bg-blue-700 text-white rounded-t">
                       <FaRegUser />
                       {user}
                     </p>
+
                     <p className="text-base px-4 py-2 hover:bg-blue-100">
                       MyPage
                     </p>

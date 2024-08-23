@@ -10,10 +10,12 @@ interface Story {
   _id: number;
   title: string;
   content: string;
-  userNickname: string;
   createdAt: string;
   updatedAt: string;
   image: string;
+  userInfo: {
+    nickname: string;
+  };
 }
 
 export default function CommunityPage() {
@@ -40,7 +42,7 @@ export default function CommunityPage() {
   const thumnail = (content: string): string => {
     const imgRegex = /<img[^>]+src="([^">]+)"/g;
     const match = imgRegex.exec(content);
-    return match ? match[1] : "/noimg.png"; // 첫 번째 이미지가 없으면 기본 이미지 반환
+    return match ? match[1] : "/noimg.png";
   };
 
   useEffect(() => {
@@ -104,8 +106,8 @@ export default function CommunityPage() {
                     </p>
                   </Link>
                   <div className="flex gap-1 text-gray-500 text-sm">
-                    <span className="text-black hover:underline">
-                      {story.userNickname} ・
+                    <span className="text-black">
+                      {story.userInfo.nickname} ・
                     </span>
                     <span>
                       {`${new Date(story.createdAt).getFullYear()}.${(
@@ -121,12 +123,12 @@ export default function CommunityPage() {
                 </div>
                 <Link
                   to={`/community/${story._id}`}
-                  className="flex flex-col gap-3"
+                  className="flex flex-col gap-3 shrink-0"
                 >
                   <img
                     src={thumnail(story.content)}
                     alt="게시글 이미지"
-                    className="w-32 h-32 object-cover border"
+                    className="w-32 h-32 object-cover"
                   />
                 </Link>
               </div>

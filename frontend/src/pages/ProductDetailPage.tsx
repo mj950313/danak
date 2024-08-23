@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, A11y } from "swiper/modules";
 import "swiper/css";
@@ -8,22 +8,49 @@ import "swiper/css/pagination";
 import ProductCard from "../components/ProductCard";
 import Title from "../components/Title";
 import TabBar from "../components/TabBar";
-
-const products = [
-  {
-    id: 1,
-    name: "BIXOD N MOUNTAIN STREAM",
-    description: "(빅소드 엔 마운틴 스트림)",
-    price: "290,000원",
-    image: "/path/to/image1.jpg",
-    new: true,
-  },
-  // ... other products
-];
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("detail");
+  const { id } = useParams(); // URL에서 id 추출
+
+  // 상품 상세 정보를 가져오는 함수
+  const fetchProductDetail = async (id: string) => {
+    const response = await axios.get(
+      `http://localhost:8080/api/products/${id}`
+    );
+    return response.data;
+  };
+
+  const {
+    data,
+    isLoading: detailLoading,
+    isError: detailError,
+  } = useQuery({
+    queryKey: ["product"],
+    queryFn: () => fetchProductDetail(id!),
+    enabled: !!id,
+  });
+
+  const fetchProducts = async () => {
+    const response = await axios.get("http://localhost:8080/api/products");
+    return response.data.products;
+  };
+
+  const {
+    data: products = [],
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+
+  if (detailLoading || productsLoading) return <p>로딩 중...</p>;
+  if (detailError || productsError)
+    return <p>상품을 불러오는 중 오류가 발생했습니다.</p>;
 
   const handleIncrement = () => {
     setQuantity(quantity + 1);
@@ -42,18 +69,17 @@ export default function ProductDetailPage() {
 
   return (
     <div className="xl:w-[1280px] mx-auto px-3 xl:px-8 my-24">
-      {/* Product Details */}
       <div className="flex flex-col md:flex-row justify-between gap-10">
         <div className="xl:w-1/2 w-full h-auto">
           <img
-            src="/"
+            src={data.productImage}
             alt="product"
-            className="w-full pb-[100%] object-contain border-2"
+            className="w-full object-cover"
+            style={{ aspectRatio: "1/1" }}
           />
         </div>
-
         <div className="flex flex-col gap-8 xl:w-1/2 w-full">
-          <h1 className="text-2xl font-medium">존나개쩌는 낚싯대!!!</h1>
+          <h1 className="text-2xl font-medium">{data.productName}</h1>
           <div className="flex gap-5">
             <div className="flex flex-col gap-5">
               <p className="text-lg text-blue-500">판매가</p>
@@ -65,7 +91,9 @@ export default function ProductDetailPage() {
               <p className="text-sm">(최소주문수량 1개 이상)</p>
             </div>
             <div className="flex flex-col gap-5">
-              <p className="text-lg text-blue-500">78,000원</p>
+              <p className="text-lg text-blue-500">
+                {data.price.toLocaleString()}원
+              </p>
               <p>대한민국</p>
               <p>국내배송</p>
               <p>택배</p>
@@ -82,7 +110,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
           <div className="flex h-full items-center">
-            <p className="text-2xl">TOTAL 78,000원</p>
+            <p className="text-2xl">TOTAL {data.price.toLocaleString()}원</p>
           </div>
           <div className="flex gap-8">
             <button className="text-2xl w-1/2 py-5 text-center text-white bg-blue-500/70 hover:bg-blue-500">
@@ -99,14 +127,19 @@ export default function ProductDetailPage() {
 
       {activeTab === "detail" && (
         <div className="mb-20">
-          <div className="md:w-1/2 w-full h-auto mb-10">
-            <img
-              src="/"
-              alt="product"
-              className="w-full pb-[100%] object-contain border-2"
-            />
-          </div>
-          <h1 className="text-3xl font-bold">프리미엄 낚싯대</h1>
+          <h1 className="text-3xl font-bold">{data.description}</h1>
+
+          {data.detailImages.map((detailImage: string, index: number) => (
+            <div key={index} className="md:w-1/2 w-full h-auto mb-10">
+              <img
+                src={detailImage}
+                alt="productDetialImage"
+                style={{ aspectRatio: "1/1" }}
+              />
+            </div>
+          ))}
+
+          <h3 className="text-3xl font-bold">{data.description}</h3>
           <p className="text-lg mt-4">
             이 제품은 최고급 소재로 제작되었습니다. 모든 낚시 애호가들이
             추천하는 제품입니다.
@@ -121,12 +154,6 @@ export default function ProductDetailPage() {
             <p className="mt-2">
               초보자부터 전문가까지 모두에게 적합한 낚싯대입니다. 다양한 어종을
               낚을 수 있도록 설계되었습니다.
-            </p>
-          </div>
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold">구성품</h2>
-            <p className="mt-2">
-              구성품: 낚싯대 본체, 보호 케이스, 추가 악세서리
             </p>
           </div>
           <div className="mt-6">
@@ -171,10 +198,10 @@ export default function ProductDetailPage() {
           },
         }}
       >
-        {products.map((product) => (
-          <SwiperSlide key={product.id}>
-            <Link to={`/products/${product.id}`}>
-              <ProductCard key={product.id} product={product} />
+        {products?.map((product: any) => (
+          <SwiperSlide key={product._id}>
+            <Link to={`/products/${product._id}`}>
+              <ProductCard key={product._id} product={product} />
             </Link>
           </SwiperSlide>
         ))}
