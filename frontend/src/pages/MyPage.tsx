@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import api from "../api/api";
 import { Link } from "react-router-dom";
 import ProductRegistration from "../components/MyPageComponent/ProductRegistration";
+import ProductDelete from "../components/MyPageComponent/ProductDelete";
 
 interface UserInfo {
   name: string;
@@ -25,10 +26,9 @@ const MyPage: React.FC = () => {
   const [editProfileForm] = Form.useForm();
   const accessToken = useSelector((state: any) => state.user.accessToken);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [postsData, setPostsData] = useState<any[]>([]); // 내가 쓴 글 데이터를 저장할 상태
+  const [postsData, setPostsData] = useState<any[]>([]);
   const [commentsData, setCommentsData] = useState<CommentData[]>([]);
 
-  //프로필 가져오는 함수
   const fetchUserInfo = async () => {
     try {
       const response = await api.get<UserInfo>(
@@ -42,6 +42,7 @@ const MyPage: React.FC = () => {
       const data = response.data;
       setUserInfo(data);
       console.log(data);
+      localStorage.setItem("user", data.nickname);
 
       editProfileForm.setFieldsValue({
         name: data.name,
@@ -271,6 +272,13 @@ const MyPage: React.FC = () => {
       key: "5",
       label: "상품 등록",
       children: <ProductRegistration />,
+    });
+  }
+  if (isAdmin) {
+    items.push({
+      key: "6",
+      label: "상품 삭제",
+      children: <ProductDelete />,
     });
   }
 

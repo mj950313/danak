@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Pagination } from "antd";
 import AuthenticationModal from "../components/AuthenticationModal";
 import { useSelector } from "react-redux"; // Redux에서 상태를 가져오기 위한 임포트
+import { CiWarning } from "react-icons/ci";
 
 interface Story {
   _id: number;
@@ -134,7 +135,12 @@ export default function CommunityPage() {
               </div>
             ))
           ) : (
-            <p className="text-center py-10">게시글이 없습니다.</p>
+            <div className="flex items-center justify-center h-[500px]">
+              <p className="text-black text-xl font-semibold flex flex-col items-center">
+                <CiWarning className="text-blue-500 text-4xl" />
+                게시글이 없습니다.
+              </p>
+            </div>
           )}
 
           <button
@@ -147,10 +153,10 @@ export default function CommunityPage() {
 
           <Pagination
             className="flex justify-center mt-5"
-            current={currentPage} // 현재 페이지 번호
-            total={totalPages * 10} // 전체 게시물 수 (각 페이지당 10개의 글을 표시)
-            onChange={handlePageChange} // 페이지 변경 시 호출될 함수
-            pageSize={10} // 한 페이지당 보여줄 글의 수
+            current={currentPage}
+            total={totalPages * 10}
+            onChange={handlePageChange}
+            pageSize={10}
           />
         </div>
       </div>

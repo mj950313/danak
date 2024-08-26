@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaRegUser } from "react-icons/fa";
 import { HiMenu } from "react-icons/hi";
@@ -8,6 +8,8 @@ import CartPanel from "../components/CartPanel";
 import SignModal from "../components/SignModal";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/slices/userSlice";
+import { useQueryClient } from "@tanstack/react-query";
+import api from "../api/api";
 
 export default function Gnb() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,15 +17,15 @@ export default function Gnb() {
   const [bgColor, setBgColor] = useState("transparent");
   const [textColor, setTextColor] = useState("text-white");
   const [signModalOpen, setSignModalOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false); // 드롭다운 메뉴 상태
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  const userMenuRef = useRef<HTMLDivElement>(null); // 드롭다운 영역을 감지하기 위한 ref
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Redux에서 유저 상태를 가져옴
   const user = useSelector((state: any) => state.user.user);
 
   const toggleMenu = () => {
@@ -39,7 +41,7 @@ export default function Gnb() {
   };
 
   const toggleUserMenu = () => {
-    setUserMenuOpen(!userMenuOpen); // 유저 드롭다운 메뉴 토글
+    setUserMenuOpen(!userMenuOpen);
   };
 
   const handleScroll = () => {
@@ -72,12 +74,19 @@ export default function Gnb() {
     });
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    setUserMenuOpen(false);
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await api.post("/api/auth/logout");
+      dispatch(logout());
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userId");
+      queryClient.clear();
+      setUserMenuOpen(false);
+      navigate("/");
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   // 드롭다운 외부 클릭 감지 로직
@@ -106,39 +115,39 @@ export default function Gnb() {
     <div className={`sticky top-0 w-full py-8 z-10 ${bgColor}`}>
       <header className="flex justify-between px-3 xl:px-8 items-center mx-auto xl:w-[1280px]">
         <nav className="flex gap-8 items-center">
-          <Link
-            to="/"
+          <a
+            href="/"
             onClick={scrollToTop}
             className="flex items-center text-4xl xl:text-5xl font-semibold text-blue-700 hover:text-blue-800"
           >
             <GiFishbone />
             Danak
-          </Link>
+          </a>
           <div className={`hidden md:flex gap-8 text-xl ${textColor}`}>
-            <Link
-              to="/products"
+            <a
+              href="/products"
               className={`hover:text-blue-700 ${
                 location.pathname === "/products" ? "text-blue-700" : ""
               }`}
             >
               Products
-            </Link>
-            <Link
-              to="/community"
+            </a>
+            <a
+              href="/community"
               className={`hover:text-blue-700 ${
                 location.pathname === "/community" ? "text-blue-700" : ""
               }`}
             >
               Community
-            </Link>
-            <Link
-              to="/contact"
+            </a>
+            <a
+              href="/contact"
               className={`hover:text-blue-700 ${
                 location.pathname === "/contact" ? "text-blue-700" : ""
               }`}
             >
               Contact us
-            </Link>
+            </a>
           </div>
         </nav>
         <nav className="flex gap-2 xl:gap-5 items-center text-md sm:text-xl">
@@ -167,7 +176,7 @@ export default function Gnb() {
 
               {userMenuOpen && (
                 <div className="absolute flex flex-col right-0 mt-2 w-max bg-white rounded shadow-xl">
-                  <Link to="/mypage">
+                  <a href="/mypage">
                     <p className="flex items-center gap-1 px-4 py-2 bg-blue-700 text-white rounded-t">
                       <FaRegUser />
                       {user}
@@ -176,7 +185,7 @@ export default function Gnb() {
                     <p className="text-base px-4 py-2 hover:bg-blue-100">
                       MyPage
                     </p>
-                  </Link>
+                  </a>
                   <button
                     className="w-full text-left text-base px-4 py-2 hover:bg-blue-100"
                     onClick={handleLogout}
@@ -200,33 +209,33 @@ export default function Gnb() {
         <div
           className={`absolute w-full md:hidden flex flex-col gap-3 text-xl px-8 py-5 shadow-xl ${bgColor} ${textColor}`}
         >
-          <Link
-            to="/products"
+          <a
+            href="/products"
             onClick={toggleMenu}
             className={`hover:text-blue-700 ${
               location.pathname === "/products" ? "text-blue-700" : ""
             }`}
           >
             Products
-          </Link>
-          <Link
-            to="/community"
+          </a>
+          <a
+            href="/community"
             onClick={toggleMenu}
             className={`hover:text-blue-700 ${
               location.pathname === "/community" ? "text-blue-700" : ""
             }`}
           >
             Community
-          </Link>
-          <Link
-            to="/contact"
+          </a>
+          <a
+            href="/contact"
             onClick={toggleMenu}
             className={`hover:text-blue-700 ${
               location.pathname === "/contact" ? "text-blue-700" : ""
             }`}
           >
             Contact us
-          </Link>
+          </a>
         </div>
       )}
       <CartPanel isOpen={cartOpen} onClose={toggleCart} />

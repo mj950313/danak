@@ -2,7 +2,6 @@ import Title from "../components/Title";
 import Youtube from "../components/HomeComponent/Youtube";
 import ProductCard from "../components/ProductCard";
 import StoryCard from "../components/HomeComponent/StoryCard";
-import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, A11y } from "swiper/modules";
 import "swiper/css";
@@ -10,6 +9,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { MoonLoader } from "react-spinners";
 
 interface Product {
   _id: string;
@@ -35,10 +35,8 @@ interface Story {
 }
 
 export default function HomePage() {
-  // 상품 데이터를 fetch하는 함수
   const fetchProducts = async () => {
     const response = await axios.get("http://localhost:8080/api/products");
-    console.log(response.data);
 
     return response.data.products;
   };
@@ -69,16 +67,16 @@ export default function HomePage() {
 
   if (productsLoading || storiesLoading) {
     return (
-      <div className="flex justify-center items-center h-[600px]">
-        <p className="text-black text-xl font-semibold">로딩 중...</p>
+      <div className="flex justify-center items-center h-[680px]">
+        <MoonLoader color="#1E40AF" />
       </div>
     );
   }
 
   if (productsError || storiesError) {
     return (
-      <div className="flex justify-center items-center h-[600px]">
-        <p className="text-red-500 text-xl font-semibold">
+      <div className="flex justify-center items-center h-[680px]">
+        <p className="text-blue-700 text-xl font-semibold">
           데이터를 불러오는 중 오류가 발생했습니다.
         </p>
       </div>
@@ -117,9 +115,9 @@ export default function HomePage() {
         >
           {products.map((product) => (
             <SwiperSlide key={product._id}>
-              <Link to={`/products/${product._id}`}>
+              <a href={`/products/${product._id}`}>
                 <ProductCard key={product._id} product={product} />
-              </Link>
+              </a>
             </SwiperSlide>
           ))}
         </Swiper>
@@ -150,9 +148,9 @@ export default function HomePage() {
         >
           {stories.map((story) => (
             <SwiperSlide key={story._id}>
-              <Link to={`/community/${story._id}`}>
+              <a href={`/community/${story._id}`}>
                 <StoryCard key={story._id} story={story} />
-              </Link>
+              </a>
             </SwiperSlide>
           ))}
         </Swiper>

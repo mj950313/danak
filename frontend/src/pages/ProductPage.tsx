@@ -3,9 +3,9 @@ import Title from "../components/Title";
 import ProductCard from "../components/ProductCard";
 import { CiWarning } from "react-icons/ci";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Tabs } from "antd";
+import { Tabs, Pagination } from "antd";
+import { MoonLoader } from "react-spinners";
 
 // Product 타입 정의
 interface Product {
@@ -20,31 +20,32 @@ interface Product {
 }
 
 export default function ProductPage() {
-  // 상품 데이터를 fetch하는 함수
-  const fetchProducts = async () => {
-    const response = await axios.get("http://localhost:8080/api/products");
-    return response.data.products;
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize] = useState<number>(12);
+  const [activeCategory, setActiveCategory] = useState<string>("전체");
+
+  const fetchProducts = async (
+    page: number,
+    limit: number,
+    category: string
+  ) => {
+    const response = await axios.get(
+      `http://localhost:8080/api/products?page=${page}&limit=${limit}&category=${category}`
+    );
+    return response.data;
   };
 
-  const {
-    data: products = [],
-    isLoading,
-    isError,
-  } = useQuery<Product[], Error>({
-    queryKey: ["products"],
-    queryFn: fetchProducts,
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["products", currentPage, activeCategory],
+    queryFn: () => fetchProducts(currentPage, pageSize, activeCategory),
   });
 
-  const [activeCategory, setActiveCategory] = useState<string>("전체");
   const [title, setTitle] = useState<string>("All Products");
   const [subtitle, setSubtitle] = useState<string>("전체 상품들을 만나보세요");
 
-  // 탭 변경 시 타이틀 업데이트
   const handleTabChange = (key: string) => {
     setActiveCategory(key);
-
-    // 탭별 타이틀과 부제목 설정
-
+    setCurrentPage(1);
     switch (key) {
       case "전체":
         setTitle("All Products");
@@ -73,16 +74,18 @@ export default function ProductPage() {
     }
   };
 
-  // 선택된 카테고리의 상품 필터링
-  const filteredProducts =
-    activeCategory === "전체"
-      ? products
-      : products.filter((product) => product.category === activeCategory);
+  const tabItems = [
+    { label: "전체", key: "전체" },
+    { label: "바다", key: "바다" },
+    { label: "민물", key: "민물" },
+    { label: "루어", key: "루어" },
+    { label: "낚시용품", key: "낚시용품" },
+  ];
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[600px]">
-        <p className="text-black text-xl font-semibold">로딩 중...</p>
+        <MoonLoader color="#1E40AF" />
       </div>
     );
   }
@@ -109,31 +112,36 @@ export default function ProductPage() {
       <div className="border bg-white">
         <div className="xl:w-[1280px] mx-auto px-3 xl:px-8 my-10">
           <Tabs
-            defaultActiveKey="전체"
+            activeKey={activeCategory}
             onChange={handleTabChange}
             size="large"
             type="card"
             className="font-semibold text-4xl"
-          >
-            <Tabs.TabPane tab="전체" key="전체" />
-            <Tabs.TabPane tab="바다" key="바다" />
-            <Tabs.TabPane tab="민물" key="민물" />
-            <Tabs.TabPane tab="루어" key="루어" />
-            <Tabs.TabPane tab="낚시용품" key="낚시용품" />
-          </Tabs>
+            items={tabItems}
+          />
 
           <Title title={title} title2={subtitle} />
 
-          {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 min-h-[650px]">
-              {filteredProducts.map((product) => (
-                <Link to={`/products/${product._id}`} key={product._id}>
-                  <ProductCard product={product} />
-                </Link>
-              ))}
+          {data?.products.length > 0 ? (
+            <div>
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 min-h-[650px]">
+                {data.products.map((product: Product) => (
+                  <a href={`/products/${product._id}`} key={product._id}>
+                    <ProductCard product={product} />
+                  </a>
+                ))}
+              </div>
+
+              <div className="mt-6 flex justify-center">
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={data?.totalProducts}
+                  onChange={(page) => setCurrentPage(page)}
+                />
+              </div>
             </div>
           ) : (
-            // 상품이 없을 때
             <div className="flex items-center justify-center h-[650px]">
               <p className="text-black text-xl font-semibold flex flex-col items-center">
                 <CiWarning className="text-blue-500 text-4xl" />

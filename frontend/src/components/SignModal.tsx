@@ -96,12 +96,12 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
         },
         { withCredentials: true }
       );
-      const { accessToken, user } = response.data;
+      const { accessToken, user, userId } = response.data;
       localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("user", user); // 객체는 문자열로 변환
-      console.log(response.data);
+      localStorage.setItem("user", user);
+      localStorage.setItem("userId", userId);
 
-      dispatch(login({ accessToken, user }));
+      dispatch(login({ accessToken, user, userId }));
       onClose();
       navigate("/");
     } catch (error: any) {

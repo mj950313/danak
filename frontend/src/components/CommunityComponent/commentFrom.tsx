@@ -17,7 +17,6 @@ export default function CommentForm({
   const handleSubmit = async (values: { content: string }) => {
     setLoading(true);
     try {
-      // 댓글 작성 API 요청
       const response = await api.post(
         `http://localhost:8080/api/community/${communityId}/comments`,
         { content: values.content }

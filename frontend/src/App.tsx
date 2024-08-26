@@ -14,13 +14,15 @@ function App() {
   useEffect(() => {
     const storedAccessToken = localStorage.getItem("accessToken");
     const storedUser = localStorage.getItem("user");
+    const storedUserId = localStorage.getItem("userId");
 
     // 로컬 스토리지에 토큰과 유저가 있으면 Redux에 저장
-    if (storedAccessToken && storedUser) {
+    if (storedAccessToken && storedUser && storedUserId) {
       dispatch(
         login({
           accessToken: storedAccessToken,
           user: storedUser,
+          userId: storedUserId,
         })
       );
     }

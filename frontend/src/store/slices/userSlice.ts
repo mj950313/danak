@@ -4,6 +4,7 @@ const initialState = {
   isAuthenticated: false, 
   user: null, 
   accessToken: null,
+  userId: null,
 };
 
 const userSlice = createSlice({
@@ -15,12 +16,15 @@ const userSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
+      state.userId = action.payload.userId;
+
     },
     // 로그아웃 액션: 유저 데이터를 초기화하고 인증 상태를 false로 설정
     logout(state) {
       state.isAuthenticated = false;
       state.user = null;
       state.accessToken = null;
+      state.userId = null;
     },
   },
 });

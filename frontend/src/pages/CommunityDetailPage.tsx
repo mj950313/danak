@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { Button, message, Modal } from "antd";
 import CommentForm from "../components/CommunityComponent/commentFrom";
 import api from "../api/api";
+import { MoonLoader } from "react-spinners";
 
 interface Story {
   id: string;
@@ -15,6 +16,7 @@ interface Story {
   updatedAt: string;
   image?: string;
   comments: Comment[]; // 댓글 리스트
+  userId: string;
 }
 
 interface Comment {
@@ -30,8 +32,9 @@ export default function CommunityDetailPage() {
   const [story, setStory] = useState<Story | null>(null);
   const navigate = useNavigate();
   const accessToken = useSelector((state: any) => state.user.accessToken);
-  const user = useSelector((state: any) => state.user.user);
+  const userId = useSelector((state: any) => state.user.userId);
   const { confirm } = Modal;
+  console.log(userId);
   // 글과 댓글 정보 가져오기
   const fetchStory = async () => {
     try {
@@ -108,7 +111,11 @@ export default function CommunityDetailPage() {
   };
 
   if (!story) {
-    return <p className="text-center py-10">Loading...</p>;
+    return (
+      <p className="flex justify-center items-center h-[600px]">
+        <MoonLoader color="#1D4ED8" size={50} />
+      </p>
+    );
   }
 
   return (
@@ -150,7 +157,7 @@ export default function CommunityDetailPage() {
           />
           <div className="flex">
             <div className="flex gap-3">
-              {user === story.userNickname && (
+              {userId === story.userId && (
                 <>
                   <Button
                     onClick={handleDeleteStory}
@@ -183,7 +190,7 @@ export default function CommunityDetailPage() {
                   {new Date(comment.createdAt).toLocaleString()}
                 </p>
                 {/* 댓글 작성자만 삭제 버튼 표시 */}
-                {comment.author === user && (
+                {comment.authorId === userId && (
                   <Button
                     onClick={() => handleDeleteComment(comment._id)}
                     className="border mt-1 border-blue-500"

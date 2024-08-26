@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, A11y } from "swiper/modules";
 import "swiper/css";
@@ -9,14 +9,23 @@ import ProductCard from "../components/ProductCard";
 import Title from "../components/Title";
 import TabBar from "../components/TabBar";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import AuthenticationModal from "../components/AuthenticationModal";
+import { useSelector } from "react-redux";
+import { message } from "antd";
+import api from "../api/api";
+import CartPanel from "../components/CartPanel";
 
 export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("detail");
-  const { id } = useParams(); // URL에서 id 추출
+  const { id } = useParams();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const userId = useSelector((state: any) => state.user.userId);
+  const accessToken = useSelector((state: any) => state.accessToken);
+  const [cartOpen, setCartOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  // 상품 상세 정보를 가져오는 함수
   const fetchProductDetail = async (id: string) => {
     const response = await axios.get(
       `http://localhost:8080/api/products/${id}`
@@ -47,6 +56,59 @@ export default function ProductDetailPage() {
     queryKey: ["products"],
     queryFn: fetchProducts,
   });
+
+  //장바구니
+  const addToCart = async ({
+    productId,
+    quantity,
+    productName,
+    productImage,
+    price,
+  }: any) => {
+    const response = await api.post(
+      "http://localhost:8080/api/cart/add",
+      {
+        productId,
+        quantity,
+        productName,
+        productImage,
+        price,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return response.data;
+  };
+
+  const addToCartMutation = useMutation({
+    mutationFn: () =>
+      addToCart({
+        productId: id,
+        quantity,
+        productName: data.productName,
+        productImage: data.productImage,
+        price: data.price,
+      }),
+    onSuccess: () => {
+      message.success("장바구니에 추가되었습니다!");
+      setCartOpen(true);
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: () => {
+      message.error("장바구니 추가에 실패했습니다.");
+    },
+  });
+
+  const handleAddToCart = () => {
+    if (!userId) {
+      setShowLoginModal(true);
+    } else {
+      addToCartMutation.mutate();
+    }
+  };
 
   if (detailLoading || productsLoading) return <p>로딩 중...</p>;
   if (detailError || productsError)
@@ -110,13 +172,18 @@ export default function ProductDetailPage() {
             </div>
           </div>
           <div className="flex h-full items-center">
-            <p className="text-2xl">TOTAL {data.price.toLocaleString()}원</p>
+            <p className="text-2xl">
+              TOTAL {(data.price * quantity).toLocaleString()}원
+            </p>
           </div>
           <div className="flex gap-8">
             <button className="text-2xl w-1/2 py-5 text-center text-white bg-blue-500/70 hover:bg-blue-500">
               BUY IT NOW
             </button>
-            <button className="text-2xl w-1/2 py-5 text-center text-blue-500/70 border-blue-500/70 border hover:text-blue-500 hover:border-blue-500">
+            <button
+              onClick={handleAddToCart}
+              className="text-2xl w-1/2 py-5 text-center text-blue-500/70 border-blue-500/70 border hover:text-blue-500 hover:border-blue-500"
+            >
               CART
             </button>
           </div>
@@ -127,42 +194,16 @@ export default function ProductDetailPage() {
 
       {activeTab === "detail" && (
         <div className="mb-20">
-          <h1 className="text-3xl font-bold">{data.description}</h1>
+          <h3 className="text-3xl font-bold mb-10">{data.description}</h3>
 
           {data.detailImages.map((detailImage: string, index: number) => (
-            <div key={index} className="md:w-1/2 w-full h-auto mb-10">
-              <img
-                src={detailImage}
-                alt="productDetialImage"
-                style={{ aspectRatio: "1/1" }}
-              />
+            <div
+              key={index}
+              className=" w-full h-auto mb-10 flex justify-center"
+            >
+              <img src={detailImage} alt="productDetialImage" />
             </div>
           ))}
-
-          <h3 className="text-3xl font-bold">{data.description}</h3>
-          <p className="text-lg mt-4">
-            이 제품은 최고급 소재로 제작되었습니다. 모든 낚시 애호가들이
-            추천하는 제품입니다.
-          </p>
-          <ul className="mt-4 space-y-2">
-            <li>경량 설계로 장시간 사용에도 피로감이 적습니다.</li>
-            <li>내구성이 뛰어나 오랫동안 사용할 수 있습니다.</li>
-            <li>정밀한 조작이 가능하여 다양한 낚시 상황에 적합합니다.</li>
-          </ul>
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold">사용 설명</h2>
-            <p className="mt-2">
-              초보자부터 전문가까지 모두에게 적합한 낚싯대입니다. 다양한 어종을
-              낚을 수 있도록 설계되었습니다.
-            </p>
-          </div>
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold">주의사항</h2>
-            <p className="mt-2">
-              사용 후 깨끗이 세척하여 보관하십시오. 아이들의 손이 닿지 않는 곳에
-              보관해 주세요.
-            </p>
-          </div>
         </div>
       )}
 
@@ -175,7 +216,10 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      <Title title="All Products" title2="모든 상품들을 만나보세요" />
+      <Title
+        title="New Products"
+        title2="새롭게 입고된 신상품들을 만나보세요"
+      />
       <Swiper
         modules={[Navigation, Pagination, Autoplay, A11y]}
         spaceBetween={10}
@@ -200,12 +244,21 @@ export default function ProductDetailPage() {
       >
         {products?.map((product: any) => (
           <SwiperSlide key={product._id}>
-            <Link to={`/products/${product._id}`}>
+            <a href={`/products/${product._id}`}>
               <ProductCard key={product._id} product={product} />
-            </Link>
+            </a>
           </SwiperSlide>
         ))}
       </Swiper>
+
+      {showLoginModal && (
+        <AuthenticationModal
+          visible={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
+
+      <CartPanel isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   );
 }
