@@ -893,22 +893,29 @@ app.post("/api/auth/refresh-token", async (req, res) => {
 
 // 결제 등록 API
 app.post('/api/payment', verifyToken, async (req, res) => {
-  const { productName, totalPrice, price , quantity } = req.body;
+  const { cartItems , totalPrice } = req.body;
   const userId = req.user;
 
   try {
     const payment = {
-      userId: ObjectId(userId),
-      productName,
+      userId:new ObjectId(userId),
       totalPrice,
-      price,
-      quantity,
-      totalPrice,
+      cartItems,
       status: '결제완료',
       createdAt: new Date(),
     };
 
     const result = await db.collection('payments').insertOne(payment);
+
+    await db.collection("carts").updateOne(
+      { userId: new ObjectId(userId) },
+      { 
+        $set: { 
+          cartItems: [],
+          totalPrice: 0 
+        } 
+      }
+    );
 
     res.status(200).json({
       message: '결제 내역이 등록되었습니다.',
@@ -919,6 +926,31 @@ app.post('/api/payment', verifyToken, async (req, res) => {
     res.status(500).json({ error: '결제 등록 중 오류가 발생했습니다.' });
   }
 });
+
+// 결제 내역 조회 API
+app.get('/api/payment/history', verifyToken, async (req, res) => {
+  const userId = req.user;
+
+  try {
+    // 해당 userId의 결제 내역을 조회
+    const payments = await db.collection('payments').find({ userId: new ObjectId(userId) }).toArray();
+
+    // 결제 내역이 없을 경우
+    if (payments.length === 0) {
+      return res.status(404).json({ message: '결제 내역이 없습니다.' });
+    }
+
+    // 결제 내역이 있을 경우 반환
+    res.status(200).json({
+      message: '결제 내역 조회 성공',
+      payments,
+    });
+  } catch (error) {
+    console.error('결제 내역 조회 오류:', error);
+    res.status(500).json({ error: '결제 내역을 조회하는 중 오류가 발생했습니다.' });
+  }
+});
+
 
       
 // 리액트 라우터사용
