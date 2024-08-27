@@ -10,6 +10,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/slices/userSlice";
 import { useQueryClient } from "@tanstack/react-query";
 import api from "../api/api";
+import { persistor } from "../store/store";
 
 export default function Gnb() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function Gnb() {
   const [signModalOpen, setSignModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const queryClient = useQueryClient();
+  const totalItems = useSelector((state: any) => state.cart.totalItems);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -78,10 +80,8 @@ export default function Gnb() {
     try {
       await api.post("/api/auth/logout");
       dispatch(logout());
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
-      localStorage.removeItem("userId");
       queryClient.clear();
+      persistor.purge();
       setUserMenuOpen(false);
       navigate("/");
     } catch (err) {
@@ -151,12 +151,19 @@ export default function Gnb() {
           </div>
         </nav>
         <nav className="flex gap-2 xl:gap-5 items-center text-md sm:text-xl">
-          <button
-            className="p-2 rounded-full border-2 bg-white hover:text-blue-700"
-            onClick={toggleCart}
-          >
-            <FiShoppingCart />
-          </button>
+          <div className="relative">
+            <button
+              className="p-2 rounded-full border-2 bg-white hover:text-blue-700"
+              onClick={toggleCart}
+            >
+              <FiShoppingCart />
+            </button>
+            {totalItems > 0 && (
+              <div className="absolute top-[-6px] right-[-6px] w-5 h-5 text-center text-sm bg-blue-400 text-white rounded-full">
+                {totalItems}
+              </div>
+            )}
+          </div>
           <button
             className="md:hidden p-2 rounded-full border-2 bg-white hover:text-blue-700"
             onClick={toggleMenu}

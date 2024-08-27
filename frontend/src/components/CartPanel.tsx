@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
+import { Modal, message } from "antd";
 import api from "../api/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDispatch, useSelector } from "react-redux";
+import { setTotalItems } from "../store/slices/cartSlice";
 
 interface CartPanelProps {
   isOpen: boolean;
@@ -9,8 +12,12 @@ interface CartPanelProps {
 }
 
 const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
-  const accessToken = localStorage.getItem("accessToken");
   const queryClient = useQueryClient();
+  const accessToken = useSelector((state: any) => state.user.accessToken);
+  const dispatch = useDispatch();
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const fetchCart = async () => {
     const response = await api.get("http://localhost:8080/api/cart", {
@@ -27,6 +34,12 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
     enabled: !!accessToken,
   });
 
+  useEffect(() => {
+    if (data && data.cartItems) {
+      dispatch(setTotalItems(data.cartItems.length));
+    }
+  }, [data, dispatch]);
+
   // 장바구니에서 상품을 삭제하는 함수
   const deleteCartItem = async (productId: string) => {
     const response = await api.delete(
@@ -40,16 +53,33 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
     return response.data;
   };
 
-  // 삭제 기능에 대한 Mutation
   const deleteMutation = useMutation({
     mutationFn: deleteCartItem,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] }); // 장바구니를 다시 불러오기
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
   });
 
   const handleDelete = (productId: string) => {
     deleteMutation.mutate(productId);
+  };
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    setConfirmLoading(true);
+    setTimeout(() => {
+      setConfirmLoading(false);
+      setIsModalVisible(false);
+      // 여기서 결제 완료 로직 추가
+      message.success("결제가 완료되었습니다.");
+    }, 2000);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
   };
 
   if (isLoading) return <p>로딩 중...</p>;
@@ -64,7 +94,6 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
         onClick={onClose}
       />
 
-      {/* 장바구니 패널 */}
       <div
         className={`fixed top-0 right-0 w-80 h-full bg-white shadow-xl transform ${
           isOpen ? "translate-x-0" : "translate-x-full"
@@ -107,7 +136,6 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
                       가격 {item.price.toLocaleString()}원
                     </p>
                   </div>
-                  {/* 삭제 버튼 */}
                   <button
                     className="absolute right-0 top-0 text-2xl text-blue-400 p-2 hover:scale-150"
                     onClick={() => handleDelete(item.productId)}
@@ -120,7 +148,6 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        {/* 푸터 (총 가격 및 결제 버튼) */}
         <div className="p-4 border-t">
           <div className="flex justify-between mb-4">
             <span className="text-lg font-semibold">총 결제 금액</span>
@@ -128,11 +155,50 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
               {data?.totalPrice.toLocaleString() || 0}원
             </span>
           </div>
-          <button className="w-full bg-blue-500 text-white py-2 rounded-lg">
+          <button
+            className="w-full bg-blue-500 text-white py-2 rounded-lg"
+            onClick={showModal}
+          >
             결제하기
           </button>
         </div>
       </div>
+
+      {/* 결제 모달 */}
+      <Modal
+        title="결제 확인"
+        open={isModalVisible}
+        onOk={handleOk}
+        confirmLoading={confirmLoading}
+        onCancel={handleCancel}
+        className="text-center"
+      >
+        <ul className="max-h-[500px] overflow-auto">
+          {data?.cartItems.map((item: any) => (
+            <li
+              key={item.productId}
+              className="flex gap-2 items-end justify-between mb-5"
+            >
+              <img
+                className="w-[150px] shrink-0"
+                src={item.productImage}
+                alt={item.productName}
+              />
+              <div className="flex flex-col items-end text-base font-semibold overflow-hidden w-full">
+                <p className="truncate w-full text-right font-bold">
+                  {item.productName}
+                </p>
+                <p>수량 {item.quantity}개</p>
+                <p>가격 {item.price.toLocaleString()}원</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="text-xl font-bold flex justify-between mt-10">
+          <p>총 결제 금액</p>
+          <p>{data?.totalPrice.toLocaleString()}원</p>
+        </div>
+      </Modal>
     </>
   );
 };

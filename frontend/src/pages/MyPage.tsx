@@ -40,9 +40,8 @@ const MyPage: React.FC = () => {
         }
       );
       const data = response.data;
+
       setUserInfo(data);
-      console.log(data);
-      localStorage.setItem("user", data.nickname);
 
       editProfileForm.setFieldsValue({
         name: data.name,

@@ -33,8 +33,11 @@ export default function CommunityDetailPage() {
   const navigate = useNavigate();
   const accessToken = useSelector((state: any) => state.user.accessToken);
   const userId = useSelector((state: any) => state.user.userId);
+  const user = useSelector((state: any) => state.user.user);
   const { confirm } = Modal;
   console.log(userId);
+  console.log(accessToken);
+  console.log(user);
   // 글과 댓글 정보 가져오기
   const fetchStory = async () => {
     try {

@@ -1,11 +1,11 @@
 import ProductCard from "../ProductCard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Popconfirm, message, Pagination } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
 import api from "../../api/api";
 import { useSelector } from "react-redux";
 import { CiWarning } from "react-icons/ci";
 import { useState } from "react";
+import { IoClose } from "react-icons/io5";
 
 interface Product {
   _id: string;
@@ -106,16 +106,7 @@ export default function ProductDelete() {
               okText="예"
               cancelText="아니요"
             >
-              <DeleteOutlined
-                style={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                  fontSize: "30px",
-                  color: "red",
-                  cursor: "pointer",
-                }}
-              />
+              <IoClose className="absolute right-2 top-2 text-3xl hover:scale-150 cursor-pointer text-blue-300" />
             </Popconfirm>
           </div>
         ))}

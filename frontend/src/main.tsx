@@ -10,10 +10,11 @@ import ContactPage from "./pages/ContactPage.tsx";
 import WritePage from "./pages/WritePage.tsx";
 import CommunityDetailPage from "./pages/CommunityDetailPage.tsx";
 import WriteUpdatePage from "./pages/WriteUpdatePage.tsx";
-import store from "./store/store.ts";
+import store, { persistor } from "./store/store.ts";
 import { Provider } from "react-redux";
 import MyPage from "./pages/MyPage.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PersistGate } from "redux-persist/es/integration/react";
 
 const queryClient = new QueryClient();
 
@@ -61,8 +62,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <PersistGate loading={null} persistor={persistor}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </PersistGate>
   </Provider>
 );

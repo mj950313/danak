@@ -32,25 +32,21 @@ api.interceptors.response.use(
       originalRequest._retry = true; // 무한 루프 방지
 
       try {
-        // 리프레시 토큰을 이용하여 액세스 토큰 재발급
         const response = await axios.post(
-          'http://localhost:8080/api/auth/refresh-token',  // 수정된 부분
+          'http://localhost:8080/api/auth/refresh-token',
           {},
           { withCredentials: true } // HttpOnly 쿠키로 리프레시 토큰 전송
         );
 
-        const { accessToken, user } = response.data;
+        const { accessToken, user, userId } = response.data;
 
-        // 새로 발급된 액세스 토큰을 Redux 및 로컬 스토리지에 저장
-        store.dispatch(login({ accessToken, user }));
-        localStorage.setItem('accessToken', accessToken);
+        store.dispatch(login({ accessToken, user, userId }));
 
         // 이전 요청에 새로운 토큰을 추가하고 재시도
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axios(originalRequest);
       } catch (err) {
-        // 만료 시 로그아웃 처리 및 로컬 스토리지에서 토큰 삭제
-        localStorage.removeItem('accessToken');
+
         store.dispatch(logout());
         message.error('세션이 만료되었습니다. 다시 로그인하세요.');
         return Promise.reject(err);

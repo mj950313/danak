@@ -177,7 +177,10 @@ export default function ProductDetailPage() {
             </p>
           </div>
           <div className="flex gap-8">
-            <button className="text-2xl w-1/2 py-5 text-center text-white bg-blue-500/70 hover:bg-blue-500">
+            <button
+              onClick={handleAddToCart}
+              className="text-2xl w-1/2 py-5 text-center text-white bg-blue-500/70 hover:bg-blue-500"
+            >
               BUY IT NOW
             </button>
             <button

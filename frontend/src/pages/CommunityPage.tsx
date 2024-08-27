@@ -4,7 +4,7 @@ import { BsPencilSquare } from "react-icons/bs";
 import { Link, useNavigate } from "react-router-dom";
 import { Pagination } from "antd";
 import AuthenticationModal from "../components/AuthenticationModal";
-import { useSelector } from "react-redux"; // Redux에서 상태를 가져오기 위한 임포트
+import { useSelector } from "react-redux";
 import { CiWarning } from "react-icons/ci";
 
 interface Story {
@@ -55,7 +55,6 @@ export default function CommunityPage() {
         if (response.data.posts) {
           setStorys(response.data.posts);
           setTotalPages(response.data.totalPages);
-          console.log(response.data.posts);
         } else {
           console.error("Unexpected response format:", response.data);
           setStorys([]);
