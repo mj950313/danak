@@ -117,7 +117,7 @@ const deleteFromS3 = async (url) => {
 
 // JWT 인증 미들웨어
 const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1]; // 'Bearer' 이후의 토큰만 추출
+  const token = req.headers['authorization']?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ error: '토큰이 필요합니다.' });
@@ -131,6 +131,7 @@ const verifyToken = (req, res, next) => {
     return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
   }
 };
+
 
 // 상품 조회/등록 API
 app.get("/api/products", async (req, res) => {
@@ -881,10 +882,41 @@ app.post("/api/auth/refresh-token", async (req, res) => {
     res.json({
       accessToken: newAccessToken,
       user: userFromDB.nickname,
+      userId: userFromDB._id
     });
   } catch (error) {
     console.error("리프레시 토큰 검증 실패:", error);
     res.status(403).json({ error: "유효하지 않은 리프레시 토큰입니다." });
+  }
+});
+
+
+// 결제 등록 API
+app.post('/api/payment', verifyToken, async (req, res) => {
+  const { productName, totalPrice, price , quantity } = req.body;
+  const userId = req.user;
+
+  try {
+    const payment = {
+      userId: ObjectId(userId),
+      productName,
+      totalPrice,
+      price,
+      quantity,
+      totalPrice,
+      status: '결제완료',
+      createdAt: new Date(),
+    };
+
+    const result = await db.collection('payments').insertOne(payment);
+
+    res.status(200).json({
+      message: '결제 내역이 등록되었습니다.',
+      paymentId: result.insertedId,
+    });
+  } catch (error) {
+    console.error('결제 등록 오류:', error);
+    res.status(500).json({ error: '결제 등록 중 오류가 발생했습니다.' });
   }
 });
 
