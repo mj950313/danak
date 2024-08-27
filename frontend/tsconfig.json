@@ -7,5 +7,11 @@
     {
       "path": "./tsconfig.node.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "types": [
+      "kakao.maps.d.ts"
+    ]
+    
+  }
 }
