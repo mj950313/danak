@@ -15,18 +15,13 @@ const cartSlice = createSlice({
     setTotalItems: (state, action) => {
       state.totalItems = action.payload;
     },
-    incrementTotalItems: (state) => {
-      state.totalItems += 1;
-    },
-    decrementTotalItems: (state) => {
-      if (state.totalItems > 0) {
-        state.totalItems -= 1;
-      }
+    resetCart: (state) => {
+      state.totalItems = 0;
     },
   },
 });
 
-export const { setTotalItems, incrementTotalItems, decrementTotalItems } =
+export const { setTotalItems, resetCart } =
   cartSlice.actions;
 
 export default cartSlice.reducer;

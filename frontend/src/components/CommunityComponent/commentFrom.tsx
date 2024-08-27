@@ -19,13 +19,11 @@ export default function CommentForm({
   const accessToken = useSelector((state: any) => state.user.accessToken);
   const userId = useSelector((state: any) => state.user.userId);
 
-  // 유저가 로그인되어 있지 않을 경우 true를 반환
   const isLoggedIn = !!accessToken && !!userId;
 
   const handleSubmit = async (values: { content: string }) => {
-    // 유저가 로그인 상태가 아니라면 모달을 띄움
     if (!isLoggedIn) {
-      setIsOpen(true); // 모달 열기
+      setIsOpen(true);
       return;
     }
 

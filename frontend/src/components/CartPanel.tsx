@@ -28,7 +28,7 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
     return response.data;
   };
 
-  const { data, isLoading, isError } = useQuery({
+  const { data } = useQuery({
     queryKey: ["cart"],
     queryFn: fetchCart,
     enabled: !!accessToken,
@@ -68,22 +68,38 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
     setIsModalVisible(true);
   };
 
+  //결제하기
+  const paymentItems = async () => {
+    const response = await api.post("/api/payment", {
+      cartItems: data?.cartItems,
+      totalPrice: data?.totalPrice,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  };
+
+  const paymentMutation = useMutation({
+    mutationFn: paymentItems,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+
   const handleOk = () => {
     setConfirmLoading(true);
-    setTimeout(() => {
-      setConfirmLoading(false);
-      setIsModalVisible(false);
-      // 여기서 결제 완료 로직 추가
-      message.success("결제가 완료되었습니다.");
-    }, 2000);
+    paymentMutation.mutate();
+    setConfirmLoading(false);
+    setIsModalVisible(false);
+    message.success("결제가 완료되었습니다.");
   };
 
   const handleCancel = () => {
     setIsModalVisible(false);
   };
 
-  if (isLoading) return <p>로딩 중...</p>;
-  if (isError) return <p>장바구니를 불러오는 중 오류가 발생했습니다.</p>;
+  const isCartEmpty = data?.cartItems.length === 0;
 
   return (
     <>
@@ -156,10 +172,13 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
             </span>
           </div>
           <button
-            className="w-full bg-blue-500 text-white py-2 rounded-lg"
+            className={`w-full bg-blue-500 text-white py-2 rounded-lg ${
+              !accessToken || isCartEmpty ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             onClick={showModal}
+            disabled={!accessToken || isCartEmpty}
           >
-            결제하기
+            {accessToken ? "결제하기" : "로그인이 필요합니다"}
           </button>
         </div>
       </div>

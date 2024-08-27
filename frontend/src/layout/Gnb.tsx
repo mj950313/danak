@@ -11,6 +11,7 @@ import { logout } from "../store/slices/userSlice";
 import { useQueryClient } from "@tanstack/react-query";
 import api from "../api/api";
 import { persistor } from "../store/store";
+import { resetCart } from "../store/slices/cartSlice";
 
 export default function Gnb() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -81,6 +82,7 @@ export default function Gnb() {
       await api.post("/api/auth/logout");
       dispatch(logout());
       queryClient.clear();
+      dispatch(resetCart());
       persistor.purge();
       setUserMenuOpen(false);
       navigate("/");

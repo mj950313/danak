@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import { message } from "antd";
 import api from "../api/api";
 import CartPanel from "../components/CartPanel";
+import { MoonLoader } from "react-spinners";
 
 export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
@@ -110,7 +111,12 @@ export default function ProductDetailPage() {
     }
   };
 
-  if (detailLoading || productsLoading) return <p>로딩 중...</p>;
+  if (detailLoading || productsLoading)
+    return (
+      <div className="flex justify-center items-center h-[680px]">
+        <MoonLoader color="#1E40AF" />
+      </div>
+    );
   if (detailError || productsError)
     return <p>상품을 불러오는 중 오류가 발생했습니다.</p>;
 

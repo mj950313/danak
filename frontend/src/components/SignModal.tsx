@@ -97,7 +97,6 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
         { withCredentials: true }
       );
       const { accessToken, user, userId } = response.data;
-      console.log(response.data);
       dispatch(login({ accessToken, user, userId }));
       onClose();
       navigate("/");

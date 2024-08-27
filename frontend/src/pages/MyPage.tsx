@@ -5,6 +5,7 @@ import api from "../api/api";
 import { Link } from "react-router-dom";
 import ProductRegistration from "../components/MyPageComponent/ProductRegistration";
 import ProductDelete from "../components/MyPageComponent/ProductDelete";
+import PaymentHistory from "../components/MyPageComponent/PaymentHistory";
 
 interface UserInfo {
   name: string;
@@ -115,12 +116,6 @@ const MyPage: React.FC = () => {
     }
   };
 
-  // 결제 내역 (임시)
-  const paymentData = [
-    { key: "1", product: "상품 A", price: "100,000원", date: "2023-08-21" },
-    { key: "2", product: "상품 B", price: "50,000원", date: "2023-08-10" },
-  ];
-
   const postColumns = [
     {
       title: "제목",
@@ -228,17 +223,7 @@ const MyPage: React.FC = () => {
     {
       key: "2",
       label: "결제 내역",
-      children: (
-        <Table
-          columns={[
-            { title: "상품명", dataIndex: "product", key: "product" },
-            { title: "가격", dataIndex: "price", key: "price" },
-            { title: "결제일", dataIndex: "date", key: "date" },
-          ]}
-          dataSource={paymentData}
-          pagination={false}
-        />
-      ),
+      children: <PaymentHistory />,
     },
     {
       key: "3",
