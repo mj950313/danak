@@ -22,7 +22,7 @@ const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
 app.use(express.json({limit:"50mb"}));
 var cors = require('cors');
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN,
   credentials: true, 
 }));
 app.use(express.urlencoded({limit: "50mb",extended: true})); //req.body 쓰려면 이코드가 필요
@@ -34,10 +34,11 @@ let db;
 const url = "mongodb+srv://mj950313:100489jae@minjae.mpxmk1e.mongodb.net/?retryWrites=true&w=majority&appName=minjae";
 const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
 
+const PORT = process.env.PORT || 8081
 new MongoClient(url).connect().then(()=>{
     console.log("DB연결성공")
     db = client.db("danak");
-    app.listen(8080, function () {
+    app.listen(PORT, function () {
         console.log('Server is running on port 8080');
     });
 }).catch((err)=>{
@@ -823,12 +824,10 @@ app.post("/api/auth/login", async (req, res) => {
         return res.status(400).json({ error: "이메일 또는 비밀번호가 일치하지 않습니다." });
       }
   
-      // JWT 액세스 토큰 발급 (유효기간 15분)
       const accessToken = jwt.sign({ userId: user._id }, SECRET_KEY, {
         expiresIn: "1m",
       });
   
-      // JWT 리프레시 토큰 발급 (유효기간 7일)
       const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET_KEY, {
         expiresIn: "7d",
       });
@@ -836,8 +835,8 @@ app.post("/api/auth/login", async (req, res) => {
       // 리프레시 토큰을 HttpOnly 쿠키로 전송
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true, // JS로 접근 불가
-        secure: true,   // HTTPS에서만 전송 (개발 시에는 false로 설정)
-        sameSite: "None", // CSRF 공격 방지
+        secure: false,   // HTTPS에서만 전송 (개발 시에는 false로 설정)
+        sameSite: "Lax", // CSRF 공격 방지
         maxAge: 7 * 24 * 60 * 60 * 1000, // 쿠키 유효기간 7일
       });
   
@@ -849,7 +848,7 @@ app.post("/api/auth/login", async (req, res) => {
   });
 
 app.post("/api/auth/logout", (req, res) => {
-  res.clearCookie("refreshToken", { httpOnly: true, secure: true });
+  res.clearCookie("refreshToken", { httpOnly: true, secure: false });
   res.status(200).send("로그아웃되었습니다.");
 });
   
@@ -954,8 +953,8 @@ app.get('/api/payment/history', verifyToken, async (req, res) => {
 
       
 // 리액트 라우터사용
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
+app.use(express.static(path.join(__dirname, "dist")));
 
 app.get("*", function (req, res) {
-    res.sendFile(path.join(__dirname,"../frontend/dist/index.html"))
+    res.sendFile(path.join(__dirname,"dist/index.html"))
 })
