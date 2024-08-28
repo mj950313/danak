@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { BsPencilSquare } from "react-icons/bs";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,6 +5,7 @@ import { Pagination } from "antd";
 import AuthenticationModal from "../components/AuthenticationModal";
 import { useSelector } from "react-redux";
 import { CiWarning } from "react-icons/ci";
+import api from "../api/api";
 
 interface Story {
   _id: number;
@@ -49,9 +49,7 @@ export default function CommunityPage() {
   useEffect(() => {
     const fetchStorys = async (page: number) => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/api/community?page=${page}`
-        );
+        const response = await api.get(`/api/community?page=${page}`);
         if (response.data.posts) {
           setStorys(response.data.posts);
           setTotalPages(response.data.totalPages);

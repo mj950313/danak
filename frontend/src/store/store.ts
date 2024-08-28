@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { combineReducers } from "redux";
 import storage from "redux-persist/lib/storage";
-import { persistReducer, persistStore } from "redux-persist";
+import { persistReducer, persistStore, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 import userSlice from "../store/slices/userSlice";
 import cartSlice from "../store/slices/cartSlice";
 
@@ -25,7 +25,7 @@ const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // 직렬화가 불가능한 액션을 체크하지 않도록 설정
-        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),
 });

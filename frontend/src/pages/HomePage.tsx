@@ -7,9 +7,9 @@ import { Navigation, Pagination, Autoplay, A11y } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { MoonLoader } from "react-spinners";
+import api from "../api/api";
 
 interface Product {
   _id: string;
@@ -36,7 +36,7 @@ interface Story {
 
 export default function HomePage() {
   const fetchProducts = async () => {
-    const response = await axios.get("http://localhost:8080/api/products");
+    const response = await api.get("/api/products");
 
     return response.data.products;
   };
@@ -52,7 +52,7 @@ export default function HomePage() {
 
   // 스토리 데이터를 fetch하는 함수
   const fetchStories = async () => {
-    const response = await axios.get("http://localhost:8080/api/community");
+    const response = await api.get("api/community");
     return response.data.posts;
   };
 

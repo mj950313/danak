@@ -1,13 +1,15 @@
 import axios from 'axios';
 import store from "../store/store";
 import { login, logout } from '../store/slices/userSlice';
+import { resetCart } from "../store/slices/cartSlice";
 import { message } from 'antd';
 
 // Axios 인스턴스 생성
 const api = axios.create({
-  baseURL: 'http://localhost:8080', // 서버 주소
-  withCredentials: true, // CORS 정책에서 쿠키 전송 허용
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
 });
+
 
 // 요청 인터셉터 설정
 api.interceptors.request.use(
@@ -16,6 +18,7 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+    config.withCredentials = true; 
     return config;
   },
   (error) => Promise.reject(error)
@@ -33,7 +36,7 @@ api.interceptors.response.use(
 
       try {
         const response = await axios.post(
-          'http://localhost:8080/api/auth/refresh-token',
+          `${import.meta.env.VITE_API_BASE_URL}/api/auth/refresh-token`,
           {},
           { withCredentials: true } // HttpOnly 쿠키로 리프레시 토큰 전송
         );
@@ -46,7 +49,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axios(originalRequest);
       } catch (err) {
-
+        store.dispatch(resetCart());
         store.dispatch(logout());
         message.error('세션이 만료되었습니다. 다시 로그인하세요.');
         return Promise.reject(err);

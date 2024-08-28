@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useSelector } from "react-redux";
 import { Button, message, Modal } from "antd";
 import CommentForm from "../components/CommunityComponent/commentFrom";
@@ -41,9 +40,7 @@ export default function CommunityDetailPage() {
   // 글과 댓글 정보 가져오기
   const fetchStory = async () => {
     try {
-      const response = await axios.get<Story>(
-        `http://localhost:8080/api/community/${id}`
-      );
+      const response = await api.get<Story>(`/api/community/${id}`);
       setStory(response.data);
       console.log(response.data);
     } catch (error) {
@@ -65,14 +62,11 @@ export default function CommunityDetailPage() {
       cancelText: "취소",
       onOk: async () => {
         try {
-          await api.delete(
-            `http://localhost:8080/api/community/${id}/comments/${commentId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          );
+          await api.delete(`/api/community/${id}/comments/${commentId}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
           message.success("댓글이 삭제되었습니다.");
           fetchStory();
         } catch (error) {
@@ -95,7 +89,7 @@ export default function CommunityDetailPage() {
       cancelText: "취소",
       onOk: async () => {
         try {
-          await api.delete(`http://localhost:8080/api/community/${id}`, {
+          await api.delete(`/api/community/${id}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },

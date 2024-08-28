@@ -8,7 +8,6 @@ import "swiper/css/pagination";
 import ProductCard from "../components/ProductCard";
 import Title from "../components/Title";
 import TabBar from "../components/TabBar";
-import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AuthenticationModal from "../components/AuthenticationModal";
 import { useSelector } from "react-redux";
@@ -28,9 +27,7 @@ export default function ProductDetailPage() {
   const queryClient = useQueryClient();
 
   const fetchProductDetail = async (id: string) => {
-    const response = await axios.get(
-      `http://localhost:8080/api/products/${id}`
-    );
+    const response = await api.get(`/api/products/${id}`);
     return response.data;
   };
 
@@ -45,7 +42,7 @@ export default function ProductDetailPage() {
   });
 
   const fetchProducts = async () => {
-    const response = await axios.get("http://localhost:8080/api/products");
+    const response = await api.get("/api/products");
     return response.data.products;
   };
 
@@ -67,7 +64,7 @@ export default function ProductDetailPage() {
     price,
   }: any) => {
     const response = await api.post(
-      "http://localhost:8080/api/cart/add",
+      "/api/cart/add",
       {
         productId,
         quantity,
