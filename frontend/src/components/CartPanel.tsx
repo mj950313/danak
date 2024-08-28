@@ -20,7 +20,7 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
   const [confirmLoading, setConfirmLoading] = useState(false);
 
   const fetchCart = async () => {
-    const response = await api.get("http://localhost:8080/api/cart", {
+    const response = await api.get("/api/cart", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -42,14 +42,11 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
 
   // 장바구니에서 상품을 삭제하는 함수
   const deleteCartItem = async (productId: string) => {
-    const response = await api.delete(
-      `http://localhost:8080/api/cart/delete/${productId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const response = await api.delete(`/api/cart/delete/${productId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     return response.data;
   };
 

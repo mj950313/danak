@@ -16,7 +16,7 @@ export default function WritePostPage() {
     e.preventDefault();
     try {
       const response = await api.post(
-        "http://localhost:8080/api/community/write",
+        "/api/community/write",
         {
           user,
           title,

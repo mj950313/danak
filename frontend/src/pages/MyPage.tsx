@@ -32,14 +32,11 @@ const MyPage: React.FC = () => {
 
   const fetchUserInfo = async () => {
     try {
-      const response = await api.get<UserInfo>(
-        "http://localhost:8080/api/mypage/myinfo",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await api.get<UserInfo>("/api/mypage/myinfo", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       const data = response.data;
 
       setUserInfo(data);
@@ -68,11 +65,7 @@ const MyPage: React.FC = () => {
     }
 
     try {
-      const response = await api.put(
-        "http://localhost:8080/api/mypage/myinfo/update",
-        values,
-        {}
-      );
+      const response = await api.put("/api/mypage/myinfo/update", values, {});
       message.success("프로필이 성공적으로 업데이트되었습니다.");
       setUserInfo(response.data);
       fetchUserInfo();
@@ -85,14 +78,11 @@ const MyPage: React.FC = () => {
   // 내가 쓴 글 가져오는 함수
   const fetchPosts = async () => {
     try {
-      const response = await api.get(
-        "http://localhost:8080/api/mypage/myposts",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await api.get("/api/mypage/myposts", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       setPostsData(response.data.reverse()); // 받아온 글 데이터를 상태에 저장
     } catch (err) {
       console.error(err);
@@ -101,14 +91,11 @@ const MyPage: React.FC = () => {
 
   const fetchComments = async () => {
     try {
-      const response = await api.get<CommentData[]>(
-        "http://localhost:8080/api/mypage/mycomments",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await api.get<CommentData[]>("/api/mypage/mycomments", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       setCommentsData(response.data.reverse());
       console.log(response.data);
     } catch (err) {

@@ -2,10 +2,10 @@ import { useState } from "react";
 import Title from "../components/Title";
 import ProductCard from "../components/ProductCard";
 import { CiWarning } from "react-icons/ci";
-import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, Pagination } from "antd";
 import { MoonLoader } from "react-spinners";
+import api from "../api/api";
 
 // Product 타입 정의
 interface Product {
@@ -29,8 +29,8 @@ export default function ProductPage() {
     limit: number,
     category: string
   ) => {
-    const response = await axios.get(
-      `http://localhost:8080/api/products?page=${page}&limit=${limit}&category=${category}`
+    const response = await api.get(
+      `/api/products?page=${page}&limit=${limit}&category=${category}`
     );
     return response.data;
   };

@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import Input from "../components/Input";
 import { IoMdClose } from "react-icons/io";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import { FaSpinner } from "react-icons/fa";
 import { login } from "../store/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 interface SignModalProps {
   isOpen: boolean;
@@ -55,10 +55,7 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/register",
-        data
-      );
+      const response = await api.post("/api/auth/register", data);
       setLoginMessage("회원가입이 완료되었습니다!");
       handleTabChange("로그인");
       console.log(response.data);
@@ -88,8 +85,8 @@ export default function SignModal({ isOpen, onClose }: SignModalProps) {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
+      const response = await api.post(
+        "/api/auth/login",
         {
           email: data.id,
           password: data.pwd,

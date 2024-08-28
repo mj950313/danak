@@ -30,7 +30,7 @@ export default function CommentForm({
     setLoading(true);
     try {
       const response = await api.post(
-        `http://localhost:8080/api/community/${communityId}/comments`,
+        `/api/community/${communityId}/comments`,
         { content: values.content },
         {
           headers: {

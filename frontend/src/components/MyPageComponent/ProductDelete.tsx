@@ -25,21 +25,16 @@ export default function ProductDelete() {
   const [pageSize] = useState(12);
 
   const fetchProducts = async (page: number, limit: number) => {
-    const response = await api.get(
-      `http://localhost:8080/api/products?page=${page}&limit=${limit}`
-    );
+    const response = await api.get(`/api/products?page=${page}&limit=${limit}`);
     return response.data;
   };
 
   const deleteProduct = async (id: string): Promise<void> => {
-    const response = await api.delete(
-      `http://localhost:8080/api/products/delete/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const response = await api.delete(`/api/products/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     console.log(response);
   };
 

@@ -2,10 +2,11 @@ export default function Youtube() {
   return (
     <div className="absolute top-[-150px] w-full h-[600px] xl:h-[800px] overflow-hidden bg-blend-overlay">
       <video
-        className="w-full h-[1000px] object-cover aspect-video"
+        className="w-full h-[1000px] object-cover"
         autoPlay
         muted
         loop
+        playsInline
       >
         <source src="/youtube.mp4" type="video/mp4" />
       </video>

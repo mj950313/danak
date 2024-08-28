@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import api from "../api/api";
@@ -27,7 +26,7 @@ export default function WritePostPage() {
 
     try {
       await api.put(
-        `http://localhost:8080/api/community/write/${id}`,
+        `/api/community/write/${id}`,
         {
           title,
           content,
@@ -47,9 +46,7 @@ export default function WritePostPage() {
   useEffect(() => {
     const fetchStory = async () => {
       try {
-        const response = await axios.get<Story>(
-          `http://localhost:8080/api/community/${id}`
-        );
+        const response = await api.get<Story>(`/api/community/${id}`);
         setTitle(response.data.title);
         setContent(response.data.content);
       } catch (error) {
