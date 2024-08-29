@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { persistor } from "../store/store";
 import { resetCart } from "../store/slices/cartSlice";
 import api from "../api/api";
+import { TbFishChristianity } from "react-icons/tb";
 
 export default function Gnb() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -126,6 +127,7 @@ export default function Gnb() {
             onClick={scrollToTop}
             className="flex items-center text-4xl xl:text-5xl font-semibold text-blue-700 hover:text-blue-800"
           >
+            <TbFishChristianity />
             Danak
           </a>
           <div className={`hidden md:flex gap-8 text-xl ${textColor}`}>
