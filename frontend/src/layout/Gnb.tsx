@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaRegUser } from "react-icons/fa";
 import { HiMenu } from "react-icons/hi";
-import { GiFishbone } from "react-icons/gi";
+import { IoClose } from "react-icons/io5";
 import CartPanel from "../components/CartPanel";
 import SignModal from "../components/SignModal";
 import { useSelector, useDispatch } from "react-redux";
@@ -33,6 +33,10 @@ export default function Gnb() {
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
   };
 
   const toggleCart = () => {
@@ -122,7 +126,6 @@ export default function Gnb() {
             onClick={scrollToTop}
             className="flex items-center text-4xl xl:text-5xl font-semibold text-blue-700 hover:text-blue-800"
           >
-            <GiFishbone />
             Danak
           </a>
           <div className={`hidden md:flex gap-8 text-xl ${textColor}`}>
@@ -216,35 +219,45 @@ export default function Gnb() {
       </header>
       {menuOpen && (
         <div
-          className={`absolute w-full md:hidden flex flex-col gap-3 text-xl px-8 py-5 shadow-xl ${bgColor} ${textColor}`}
+          className={`fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 z-20 transition-all duration-500 ease-in-out ${
+            menuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         >
-          <a
-            href="/products"
-            onClick={toggleMenu}
-            className={`hover:text-blue-700 ${
-              location.pathname === "/products" ? "text-blue-700" : ""
-            }`}
+          <button
+            onClick={closeMenu}
+            className="absolute top-5 right-5 text-white text-3xl"
           >
-            Products
-          </a>
-          <a
-            href="/community"
-            onClick={toggleMenu}
-            className={`hover:text-blue-700 ${
-              location.pathname === "/community" ? "text-blue-700" : ""
-            }`}
-          >
-            Community
-          </a>
-          <a
-            href="/contact"
-            onClick={toggleMenu}
-            className={`hover:text-blue-700 ${
-              location.pathname === "/contact" ? "text-blue-700" : ""
-            }`}
-          >
-            Contact us
-          </a>
+            <IoClose />
+          </button>
+          <div className="flex flex-col justify-center items-center h-full text-white">
+            <a
+              href="/products"
+              onClick={toggleMenu}
+              className={`text-3xl py-4 w-full text-center hover:text-blue-400 ${
+                location.pathname === "/products" ? "text-blue-400" : ""
+              }`}
+            >
+              Products
+            </a>
+            <a
+              href="/community"
+              onClick={toggleMenu}
+              className={`text-3xl py-4 w-full text-center hover:text-blue-400 ${
+                location.pathname === "/community" ? "text-blue-400" : ""
+              }`}
+            >
+              Community
+            </a>
+            <a
+              href="/contact"
+              onClick={toggleMenu}
+              className={`text-3xl py-4 w-full text-center hover:text-blue-400 ${
+                location.pathname === "/contact" ? "text-blue-400" : ""
+              }`}
+            >
+              Contact us
+            </a>
+          </div>
         </div>
       )}
       <CartPanel isOpen={cartOpen} onClose={toggleCart} />
