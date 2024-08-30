@@ -26,7 +26,7 @@
 
 
 
-## 3. 상품페이지/디테일페이지
+## 3. 프로덕트 페이지
 
 ![image](https://github.com/user-attachments/assets/a0d3670c-1707-489f-a439-ec54ab1aeaad) ![image](https://github.com/user-attachments/assets/d9b776b0-23b1-45a8-980d-c526fdcde5d4)
 
@@ -36,7 +36,7 @@
 ![image](https://github.com/user-attachments/assets/64014148-c689-4f2f-85b7-563139c2ea69)
 ![image](https://github.com/user-attachments/assets/0d8f5a41-f0be-43a2-8c89-789609806b74)
 
-## 5. 문의하기페이지
+## 5. 컨텍트 페이지
 - 카카오맵으로 위치표시
 
 ![image](https://github.com/user-attachments/assets/5ea3f6cb-537b-460f-85cf-a0883b115b8b)
