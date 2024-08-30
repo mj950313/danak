@@ -30,12 +30,11 @@ export default function ProductDelete() {
   };
 
   const deleteProduct = async (id: string): Promise<void> => {
-    const response = await api.delete(`/api/products/delete/${id}`, {
+    await api.delete(`/api/products/delete/${id}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log(response);
   };
 
   const { data, isLoading, isError } = useQuery({

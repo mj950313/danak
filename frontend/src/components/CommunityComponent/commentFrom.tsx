@@ -29,7 +29,7 @@ export default function CommentForm({
 
     setLoading(true);
     try {
-      const response = await api.post(
+      await api.post(
         `/api/community/${communityId}/comments`,
         { content: values.content },
         {
@@ -38,7 +38,6 @@ export default function CommentForm({
           },
         }
       );
-      console.log(response.data);
       message.success("댓글이 성공적으로 등록되었습니다.");
 
       form.resetFields();
