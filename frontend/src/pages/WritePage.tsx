@@ -15,7 +15,7 @@ export default function WritePostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await api.post(
+      await api.post(
         "/api/community/write",
         {
           user,
@@ -28,7 +28,6 @@ export default function WritePostPage() {
           },
         }
       );
-      console.log(response.data);
       navigate("/community");
     } catch (error) {
       console.error("에러 발생:", error);

@@ -97,7 +97,6 @@ export default function CommunityDetailPage() {
           message.success("글이 삭제되었습니다.");
           navigate("/community");
         } catch (error) {
-          console.error("Error deleting the story:", error);
           message.error("글 삭제 중 오류가 발생했습니다.");
         }
       },

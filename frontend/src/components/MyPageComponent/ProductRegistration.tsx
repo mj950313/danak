@@ -28,7 +28,7 @@ export default function ProductRegistration() {
     });
 
     try {
-      const response = await api.post(
+      await api.post(
         "http://localhost:8080/api/products/new-product",
         formData,
         {
@@ -39,7 +39,6 @@ export default function ProductRegistration() {
         }
       );
       message.success("상품이 등록되었습니다.");
-      console.log("등록된 상품: ", response.data);
     } catch (error) {
       message.error("상품 등록 중 오류가 발생했습니다.");
       console.error(error);
