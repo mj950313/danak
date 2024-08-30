@@ -835,8 +835,8 @@ app.post("/api/auth/login", async (req, res) => {
       // 리프레시 토큰을 HttpOnly 쿠키로 전송
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true, // JS로 접근 불가
-        secure: false,   // HTTPS에서만 전송 (개발 시에는 false로 설정)
-        sameSite: "Lax", // CSRF 공격 방지
+        secure: true,   // HTTPS에서만 전송 (개발 시에는 false로 설정)
+        sameSite: "None", // CSRF 공격 방지
         maxAge: 7 * 24 * 60 * 60 * 1000, // 쿠키 유효기간 7일
       });
   
