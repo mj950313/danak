@@ -21,8 +21,9 @@
 
 ## 2. 홈페이지
 - 상품들과 이야기들을 보여줍니다.
-  
-![image](https://github.com/user-attachments/assets/548f69a4-403d-4e76-8eaa-de5e05831eed)
+
+![image](https://github.com/user-attachments/assets/af036ca1-aab6-4a3d-8f26-3bcbd61a1e0a)
+
 
 
 ## 3. 상품페이지/디테일페이지
