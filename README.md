@@ -5,7 +5,11 @@
 ## 프로젝트 소개
 이 플랫폼은 단순히 제품을 판매하는 쇼핑몰에 그치지 않고, 낚시를 사랑하는 사람들이 모여 정보를 공유하고, 함께 성장할 수 있는 커뮤니티 공간을 제공하는 것을 목표로 하고 있습니다.
 
-## ✨ 사용기술 : React / TypeScript / tailwind css / Redux-Toolkit / React-Query
+## ✨ 사용기술 
+프론트엔드 : reactjs / tailwind / redux toolkit / react query  / aws s3 cloudfront + route53 (배포) 
+
+백엔드 : express /  mongoDB / aws s3 / aws elastic beanstalk + route53 (배포)  
+
 
 ## 배포사이트 <br/> 
 관리자계정 ID/PW : danak@naver.com / 12341234
