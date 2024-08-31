@@ -848,7 +848,7 @@ app.post("/api/auth/login", async (req, res) => {
   });
 
 app.post("/api/auth/logout", (req, res) => {
-  res.clearCookie("refreshToken", { httpOnly: true, secure: false });
+  res.clearCookie("refreshToken", { httpOnly: true, secure: true });
   res.status(200).send("로그아웃되었습니다.");
 });
   
