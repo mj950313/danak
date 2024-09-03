@@ -28,16 +28,12 @@ export default function ProductRegistration() {
     });
 
     try {
-      await api.post(
-        "http://localhost:8080/api/products/new-product",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      await api.post("/api/products/new-product", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       message.success("상품이 등록되었습니다.");
     } catch (error) {
       message.error("상품 등록 중 오류가 발생했습니다.");
