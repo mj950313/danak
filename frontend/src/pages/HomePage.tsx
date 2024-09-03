@@ -48,9 +48,9 @@ export default function HomePage() {
   } = useQuery<Product[], Error>({
     queryKey: ["products"],
     queryFn: fetchProducts,
+    staleTime: 1000 * 60 * 5,
   });
 
-  // 스토리 데이터를 fetch하는 함수
   const fetchStories = async () => {
     const response = await api.get("api/community");
     return response.data.posts;
@@ -63,6 +63,7 @@ export default function HomePage() {
   } = useQuery<Story[], Error>({
     queryKey: ["stories"],
     queryFn: fetchStories,
+    staleTime: 1000 * 60 * 5,
   });
 
   if (productsLoading || storiesLoading) {

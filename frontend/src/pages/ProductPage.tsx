@@ -32,12 +32,14 @@ export default function ProductPage() {
     const response = await api.get(
       `/api/products?page=${page}&limit=${limit}&category=${category}`
     );
+    console.log(response.data);
     return response.data;
   };
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["products", currentPage, activeCategory],
     queryFn: () => fetchProducts(currentPage, pageSize, activeCategory),
+    staleTime: 1000 * 60 * 5,
   });
 
   const [title, setTitle] = useState<string>("All Products");
